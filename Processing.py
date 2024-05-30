@@ -1,0 +1,2 @@
+class FFT(object):
+    pass
