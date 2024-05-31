@@ -1,5 +1,6 @@
 # Rocket Tracking System
-![](images/unimelb_logo.png)
+![](images/unimelb_logo.jpg)
+<br />
 2024 Electrical Engineering Capstone Project.
 #### Authors:
 * Dani Azeez
