@@ -125,6 +125,9 @@ def main():
             real = fft_out[device_num][sample_num].real                 # I
             imag = fft_out[device_num][sample_num].imag                 # Q
             
+            real = np.abs(real[:num_dpoints])
+            imag = np.abs(imag[:num_dpoints])
+            
             # Plot Data
             ax[sample_num][device_num].plot(freq, real, color='red')        # Plot I
             ax[sample_num][device_num].plot(freq, imag, color='blue')       # Plot Q
