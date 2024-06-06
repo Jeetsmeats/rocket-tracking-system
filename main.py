@@ -35,11 +35,12 @@ def main():
     sdr_key = list(sdr.keys())
 
     ## Constants   
-    num_samples = 5                 # Number of samples
+    num_samples = 5000              # Number of samples
+    num_plot_samples = 5            # Number of samples to plot
     num_dpoints = 1024 * 1          # Numer of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
-    center_freq = 100e6             # Center Frequency
+    center_freq = 990e6             # Center Frequency
     bw = 10e6                       # Bandwidth
     sample_rate = 20e6              # Sample Rate
     
@@ -55,7 +56,7 @@ def main():
     phase_out = data                                                                    # Phase Data
     
     ## Figures
-    fig, ax = plt.subplots(num_samples, num_devices, constrained_layout=True)
+    fig, ax = plt.subplots(num_plot_samples, num_devices, constrained_layout=True)
     
     # Retrieve device information for each detected HackRF
     for n_device, device in enumerate(sdr):
@@ -103,7 +104,7 @@ def main():
                 if ret > 0 and not flags:
                     
                     data[n_device][i] = buff
-                    fft_out[n_device][i] = fft(buff, norm="ortho")
+                    fft_out[n_device][i] = fft(buff)
                     
             # Close the stream
             hackrf.deactivateStream(stream)                 # stop streaming
@@ -116,23 +117,24 @@ def main():
             print(f'\nDevice {n_device}\ndata: {data[n_device]}')            
             print("---------------------------------\n")
     
+    print(fft_out.shape)
     for device_num in range(num_devices):
-        for sample_num in range(num_samples):
+        for plot_sample_num,sample_num in enumerate(range((num_samples - num_plot_samples), num_samples)):
             
             # Get the IQ values
             out = fft_out[device_num][sample_num]                                  # FFT for single sample
                         
             # Plot Data
-            ax[sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot Q
+            ax[plot_sample_num][device_num].plot(freq-bw, np.abs(out), color='blue')       # Plot Q
 
             # Plot Labels
-            ax[sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
-            ax[sample_num][device_num].set_xlabel('f(Hz)')
-            ax[sample_num][device_num].set_ylabel('Mag')
+            ax[plot_sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
+            ax[plot_sample_num][device_num].set_xlabel('f(Hz)')
+            ax[plot_sample_num][device_num].set_ylabel('Mag')
             
             # Grid Lines
-            ax[sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
-            ax[sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
+            ax[plot_sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
+            ax[plot_sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
             
     # plt.tight_layout()
     plt.show()
