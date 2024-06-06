@@ -35,32 +35,34 @@ def main():
     sdr_key = list(sdr.keys())
 
     ## Constants   
-    num_samples = 5                # Number of samples
+    num_samples = 5                 # Number of samples
     num_dpoints = 1024              # Numer of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
     center_freq = 915e6             # Center Frequency
     bw = 10e6                       # Bandwidth
-    sample_rate = 10e6              # Sample Rate
+    sample_rate = 20e6              # Sample Rate
     
     # Variables
     streams = []                    # List of HackRF Streams
-    t = np.arange(num_dpoints)
-    freq = fftfreq(t.shape[-1])
+    # t = np.arange(num_dpoints)
+    freq = np.arange(-bw/2,  bw/2, bw/num_dpoints)
+    freq += center_freq
     
     # Data storage
     data = np.empty((num_devices, num_samples, num_dpoints), np.complex64)              # Raw Data
-    fft_out = data                                                                      # FFT Data
+    fft_out = data                                                                      # FFT Values
+    phase_out = data                                                                    # Phase Data
     
     ## Figures
     fig, ax = plt.subplots(num_samples, num_devices, constrained_layout=True)
-    # fig.subplots_adjust(hspace=0.1, wspace=0.2)
+    
     
     # Retrieve device information for each detected HackRF
     for n_device, device in enumerate(sdr):
         
         ## HackRF Settings
-        # Retrieve selected HackRF
+        # Retrieve sele devcted HackRF
         hackrf = sdr[device].get_board()
         
         # Apply settings
@@ -93,41 +95,35 @@ def main():
         try:
             
             # Retrieve 10 samples
-            for i in range(num_samples):
-                
+            for i in range(num_samples):                    
+                             
                 info = hackrf.readStream(stream, [buff], len(buff))
                 ret, flags, timeNs = info.ret, info.flags, info.timeNs
-                
-                # FFT Buffer
-                fft_buffer = fft(buff, norm="forward")
                 
                 # Store data
                 if ret > 0 and not flags:
                     
                     data[n_device][i] = buff
-                    fft_out[n_device][i] = fft_buffer
+                    fft_out[n_device][i] = fft(buff, norm="ortho")
                     
             # Close the stream
-            hackrf.deactivateStream(stream) #stop streaming
+            hackrf.deactivateStream(stream)                 # stop streaming
             hackrf.closeStream(stream)
         except Exception as e:
             print(f'The following error was found: {e}')
         finally:
         
             # Add samples to data stack
-            print(f'\nDevice {n_device}\ndata: {data[n_device]}\nfft data: {fft_out[n_device]}')            
+            print(f'\nDevice {n_device}\ndata: {data[n_device]}')            
             print("---------------------------------\n")
     
     for device_num in range(num_devices):
         for sample_num in range(num_samples):
             
             # Get the IQ values
-            real = fft_out[device_num][sample_num].real                 # I
-            imag = fft_out[device_num][sample_num].imag                 # Q
-            
-            real = np.abs(real[:num_dpoints])
-            imag = np.abs(imag[:num_dpoints])
-            
+            real = fft_out[device_num][sample_num]                 # I
+            imag = fft_out[device_num][sample_num]                 # Q
+                        
             # Plot Data
             ax[sample_num][device_num].plot(freq, real, color='red')        # Plot I
             ax[sample_num][device_num].plot(freq, imag, color='blue')       # Plot Q
