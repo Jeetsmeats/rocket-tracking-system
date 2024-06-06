@@ -13,10 +13,10 @@ from HackRF import HackRF
 def main():
 
     ## OPTIONAL: Check Devices
-    check_devices = input("Check compatible devices? [y]/[n] ").lower()
-    if check_devices == "y" or check_devices == "yes":
+    # check_devices = input("Check compatible devices? [y]/[n] ").lower()
+    # if check_devices == "y" or check_devices == "yes":
         
-        for result in SoapySDR.Device.enumerate(): print(result)
+    #     for result in SoapySDR.Device.enumerate(): print(result)
         
     ## HackRF Blocks
     # Default HackRF Instances
@@ -36,17 +36,17 @@ def main():
 
     ## Constants   
     num_samples = 5                 # Number of samples
-    num_dpoints = 1024              # Numer of IQ datapoints
+    num_dpoints = 1024 * 1          # Numer of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
-    center_freq = 915e6             # Center Frequency
+    center_freq = 100e6             # Center Frequency
     bw = 10e6                       # Bandwidth
     sample_rate = 20e6              # Sample Rate
     
     # Variables
     streams = []                    # List of HackRF Streams
     # t = np.arange(num_dpoints)
-    freq = np.arange(-bw/2,  bw/2, bw/num_dpoints)
+    freq = np.arange(-sample_rate/2,  sample_rate/2, sample_rate/num_dpoints)
     freq += center_freq
     
     # Data storage
@@ -56,7 +56,6 @@ def main():
     
     ## Figures
     fig, ax = plt.subplots(num_samples, num_devices, constrained_layout=True)
-    
     
     # Retrieve device information for each detected HackRF
     for n_device, device in enumerate(sdr):
@@ -121,12 +120,10 @@ def main():
         for sample_num in range(num_samples):
             
             # Get the IQ values
-            real = fft_out[device_num][sample_num]                 # I
-            imag = fft_out[device_num][sample_num]                 # Q
+            out = fft_out[device_num][sample_num]                                  # FFT for single sample
                         
             # Plot Data
-            ax[sample_num][device_num].plot(freq, real, color='red')        # Plot I
-            ax[sample_num][device_num].plot(freq, imag, color='blue')       # Plot Q
+            ax[sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot Q
 
             # Plot Labels
             ax[sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
