@@ -13,10 +13,10 @@ from HackRF import HackRF
 def main():
 
     ## OPTIONAL: Check Devices
-    check_devices = input("Check compatible devices? [y]/[n] ").lower()
-    if check_devices == "y" or check_devices == "yes":
+    # check_devices = input("Check compatible devices? [y]/[n] ").lower()
+    # if check_devices == "y" or check_devices == "yes":
         
-        for result in SoapySDR.Device.enumerate(): print(result)
+    #     for result in SoapySDR.Device.enumerate(): print(result)
         
     ## HackRF Blocks
     # Default HackRF Instances
@@ -35,19 +35,20 @@ def main():
     sdr_key = list(sdr.keys())
 
     ## Constants   
-    num_samples = 5                 # Number of samples
-    num_dpoints = 1024              # Numer of IQ datapoints
+    num_samples = 5000              # Number of samples
+    num_plot_samples = 5            # Number of samples to plot
+    num_dpoints = 1024 * 1          # Number of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
-    center_freq = 915e6             # Center Frequency
-    bw = 10e6                       # Bandwidth
+    center_freq = 920e6             # Center Frequency
+    bw = 10e6                          # Bandwidth
     sample_rate = 20e6              # Sample Rate
     
     # Variables
     streams = []                    # List of HackRF Streams
     # t = np.arange(num_dpoints)
-    freq = np.arange(-bw/2,  bw/2, bw/num_dpoints)
-    freq += center_freq
+    freq = np.arange(-sample_rate/2,  sample_rate/2, sample_rate/num_dpoints)
+    freq += center_freq - bw
     
     # Data storage
     data = np.empty((num_devices, num_samples, num_dpoints), np.complex64)              # Raw Data
@@ -55,8 +56,7 @@ def main():
     phase_out = data                                                                    # Phase Data
     
     ## Figures
-    fig, ax = plt.subplots(num_samples, num_devices, constrained_layout=True)
-    
+    fig, ax = plt.subplots(num_plot_samples, num_devices, constrained_layout=True)
     
     # Retrieve device information for each detected HackRF
     for n_device, device in enumerate(sdr):
@@ -104,7 +104,7 @@ def main():
                 if ret > 0 and not flags:
                     
                     data[n_device][i] = buff
-                    fft_out[n_device][i] = fft(buff, norm="ortho")
+                    fft_out[n_device][i] = fft(buff)
                     
             # Close the stream
             hackrf.deactivateStream(stream)                 # stop streaming
@@ -117,27 +117,25 @@ def main():
             print(f'\nDevice {n_device}\ndata: {data[n_device]}')            
             print("---------------------------------\n")
     
+    print(fft_out.shape)
     for device_num in range(num_devices):
-        for sample_num in range(num_samples):
+        for plot_sample_num,sample_num in enumerate(range((num_samples - num_plot_samples), num_samples)):
             
             # Get the IQ values
-            real = fft_out[device_num][sample_num]                 # I
-            imag = fft_out[device_num][sample_num]                 # Q
+            out = fft_out[device_num][sample_num]                                  # FFT for single sample
                         
             # Plot Data
-            ax[sample_num][device_num].plot(freq, real, color='red')        # Plot I
-            ax[sample_num][device_num].plot(freq, imag, color='blue')       # Plot Q
+            ax[plot_sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot Q
 
             # Plot Labels
-            ax[sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
-            ax[sample_num][device_num].set_xlabel('f(Hz)')
-            ax[sample_num][device_num].set_ylabel('Mag')
+            ax[plot_sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
+            ax[plot_sample_num][device_num].set_xlabel('f(Hz)')
+            ax[plot_sample_num][device_num].set_ylabel('Mag')
             
             # Grid Lines
-            ax[sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
-            ax[sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
+            ax[plot_sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
+            ax[plot_sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
             
-    # plt.tight_layout()
     plt.show()
     
 if __name__ == "__main__":

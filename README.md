@@ -19,4 +19,4 @@ A/Prof Marcus Brazil
 * Sample code for the SDR implementation can be found here: https://github.com/pothosware/SoapySDR/wiki/PythonSupport
 
 ## Relevant Information
-* Here is some relevant information regarding Quadruture Sampling: https://pysdr.org/content/sampling.html
+* Here is some relevant information regarding Quadrature Sampling: https://pysdr.org/content/sampling.html
