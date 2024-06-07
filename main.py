@@ -1,6 +1,6 @@
 # Imports
 import numpy as np
-from numpy.fft import fft, fftfreq
+from numpy.fft import fft
 import matplotlib.pyplot as plt
 
 # Import SoapySDR SDR Support Library
@@ -9,6 +9,28 @@ from SoapySDR import *          #SOAPY_SDR_ constants
 
 # Import Modules
 from HackRF import HackRF
+
+def argand(input, ax):
+    """_summary_
+    
+    Plot an argand diagram
+    Args:
+        input (_type_): _description_
+    """
+    max = np.max(np.ceil(np.absolute(input)))
+    for x in range(len(input)):
+        
+        val = input[x] / max
+        ax.plot([0,val.real],[0,val.imag],'r.',markersize=2)
+    
+    limit = 0.25 # set limits for axis
+    ax.set_xlim((-limit,limit))
+    ax.set_ylim((-limit,limit))
+    ax.set_ylabel('Imaginary')
+    ax.set_xlabel('Real')
+        
+    # ax.show()
+            
 
 def main():
 
@@ -40,29 +62,24 @@ def main():
     num_dpoints = 1024 * 1          # Number of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
-    center_freq = 920e6             # Center Frequency
-    bw = 10e6                          # Bandwidth
-    sample_rate = 20e6              # Sample Rate
+    center_freq = 900e6             # Center Frequency
+    bw = 10e6                       # Bandwidth
+    sample_rate = 10e6              # Sample Rate
     
-    # Variables
-    streams = []                    # List of HackRF Streams
-    # t = np.arange(num_dpoints)
-    freq = np.arange(-sample_rate/2,  sample_rate/2, sample_rate/num_dpoints)
-    freq += center_freq - bw
+    ## Variables    
+    streams = []                                                                        # List of HackRF Streams
     
-    # Data storage
+    freq = np.arange(-sample_rate/2,  sample_rate/2, sample_rate/num_dpoints)           # Frequency
+    # freq += center_freq
+    
     data = np.empty((num_devices, num_samples, num_dpoints), np.complex64)              # Raw Data
     fft_out = data                                                                      # FFT Values
     phase_out = data                                                                    # Phase Data
     
-    ## Figures
-    fig, ax = plt.subplots(num_plot_samples, num_devices, constrained_layout=True)
-    
-    # Retrieve device information for each detected HackRF
+    ## Retrieve HackRF device information
     for n_device, device in enumerate(sdr):
-        
-        ## HackRF Settings
-        # Retrieve sele devcted HackRF
+                
+        # Retrieve selected HackRF
         hackrf = sdr[device].get_board()
         
         # Apply settings
@@ -73,12 +90,14 @@ def main():
         # Get current board settings
         fq_range = hackrf.getFrequencyRange(SOAPY_SDR_RX, 0) 
         ant_det = hackrf.listAntennas(SOAPY_SDR_RX, 0)
+        bw_det = hackrf.getBandwidth(SOAPY_SDR_RX, 0)
         
         # Print settings
         print(f'\nHACKRF DEVICE: {device}\n',
             '------------------------------')
         print(f'Frequency Range: {fq_range[0].minimum()}-{fq_range[0].maximum()}')
         print(f'Antenna Details: {ant_det}')
+        print(f'Bandwidth Details: {bw_det}')
 
         ## Stream Data
         # Setup a stream (complex floats)
@@ -87,56 +106,69 @@ def main():
 
         # Start streaming 
         hackrf.activateStream(stream)
-
-        # Create a re-usable buffer for rx samples (Pre-allocate Memory)
-        buff = np.array([0]*num_dpoints, np.complex64) 
-        
-        print(f'\nTaking samples from {device}....')
-        try:
-            
-            # Retrieve 10 samples
-            for i in range(num_samples):                    
-                             
-                info = hackrf.readStream(stream, [buff], len(buff))
-                ret, flags, timeNs = info.ret, info.flags, info.timeNs
-                
-                # Store data
-                if ret > 0 and not flags:
-                    
-                    data[n_device][i] = buff
-                    fft_out[n_device][i] = fft(buff)
-                    
-            # Close the stream
-            hackrf.deactivateStream(stream)                 # stop streaming
-            hackrf.closeStream(stream)
-        except Exception as e:
-            print(f'The following error was found: {e}')
-        finally:
-        
-            # Add samples to data stack
-            print(f'\nDevice {n_device}\ndata: {data[n_device]}')            
-            print("---------------------------------\n")
     
-    print(fft_out.shape)
-    for device_num in range(num_devices):
+    # Create a re-usable buffer for rx samples (Pre-allocate Memory)
+    buff = np.array([0]*num_dpoints, np.complex64) 
+    
+    print(f'\nTaking samples from {device}....')
+    try:
+        
+        # Retrieve 10 samples
+        for i in range(num_samples):                    
+                        
+            # Retrieve device information for each detected HackRF
+            for n_device, device in enumerate(sdr):
+                
+                # Retrieve selected HackRF
+                hackrf = sdr[device].get_board()
+                hackrf.readStream(stream, [buff], len(buff))
+                
+                data[n_device][i] = buff / num_dpoints
+                fft_out[n_device][i] = fft(buff) / num_dpoints
+                    
+            buff = np.array([0]*num_dpoints, np.complex64) 
+
+    except Exception as e:
+        print(f'The following error was found: {e}')
+    finally:
+    
+        # Add samples to data stack
+        print(f'\nDevice {n_device}\ndata: {data[n_device]}')            
+        print("---------------------------------\n")
+            
+    for n_device, device in enumerate(sdr):
+        
+            # Close the stream
+            hackrf.deactivateStream(streams[n_device])                 # stop streaming
+            hackrf.closeStream(streams[n_device])
+    
+    ## Figures
+    fig, ax = plt.subplots(num_plot_samples, num_devices, constrained_layout=True)
+    
+    for device_num in range(num_devices): 
         for plot_sample_num,sample_num in enumerate(range((num_samples - num_plot_samples), num_samples)):
             
-            # Get the IQ values
-            out = fft_out[device_num][sample_num]                                  # FFT for single sample
-                        
-            # Plot Data
-            ax[plot_sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot Q
-
+            axis = ax[plot_sample_num][device_num]
+            
+            x = data[device_num][sample_num]
+            argand(x, axis)
+        
             # Plot Labels
             ax[plot_sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
             ax[plot_sample_num][device_num].set_xlabel('f(Hz)')
             ax[plot_sample_num][device_num].set_ylabel('Mag')
             
-            # Grid Lines
-            ax[plot_sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
-            ax[plot_sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
+            # # Get the IQ values
+            # out = fft_out[device_num][sample_num]                                  # FFT
+            
+            # ax[plot_sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot FFTq - sample_rate/2
+            
+            # # Grid Lines
+            # ax[plot_sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
+            # ax[plot_sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
             
     plt.show()
+    
     
 if __name__ == "__main__":
     main()
