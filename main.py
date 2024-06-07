@@ -37,18 +37,18 @@ def main():
     ## Constants   
     num_samples = 5000              # Number of samples
     num_plot_samples = 5            # Number of samples to plot
-    num_dpoints = 1024 * 1          # Numer of IQ datapoints
+    num_dpoints = 1024 * 1          # Number of IQ datapoints
     num_devices = len(sdr)          # Number of connected devices
     chan = 0                        # Channel
-    center_freq = 990e6             # Center Frequency
-    bw = 10e6                       # Bandwidth
+    center_freq = 920e6             # Center Frequency
+    bw = 10e6                          # Bandwidth
     sample_rate = 20e6              # Sample Rate
     
     # Variables
     streams = []                    # List of HackRF Streams
     # t = np.arange(num_dpoints)
     freq = np.arange(-sample_rate/2,  sample_rate/2, sample_rate/num_dpoints)
-    freq += center_freq
+    freq += center_freq - bw
     
     # Data storage
     data = np.empty((num_devices, num_samples, num_dpoints), np.complex64)              # Raw Data
@@ -125,7 +125,7 @@ def main():
             out = fft_out[device_num][sample_num]                                  # FFT for single sample
                         
             # Plot Data
-            ax[plot_sample_num][device_num].plot(freq-bw, np.abs(out), color='blue')       # Plot Q
+            ax[plot_sample_num][device_num].plot(freq, np.abs(out), color='blue')       # Plot Q
 
             # Plot Labels
             ax[plot_sample_num][device_num].set_title(f'{sdr_key[device_num]} (Sample {sample_num + 1})')
@@ -136,7 +136,6 @@ def main():
             ax[plot_sample_num][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
             ax[plot_sample_num][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
             
-    # plt.tight_layout()
     plt.show()
     
 if __name__ == "__main__":
