@@ -2,7 +2,7 @@
 import numpy as np
 from numpy.fft import fft
 import matplotlib.pyplot as plt
-from matplotlib import mpl
+import matplotlib as mpl
 
 class Visualiser(object):
     """_summary_
@@ -27,7 +27,7 @@ class Visualiser(object):
         self.SDR_NAMES = SDR_NAMES
         
         # Intrinsic Properties
-        self.plots = dict()
+        # self.plots = dict()
         
         mpl.rcParams['mathtext.fontset'] = 'cm'
         mpl.rcParams['mathtext.rm'] = 'serif'
@@ -43,22 +43,9 @@ class Visualiser(object):
         for x in range(len(input)):
             
             val = input[x] / max
-            ax.plot([0,val.real],[0,val.imag],'r.',markersize=2)
-                    
-    def create_figure(self, figure_name):
-        """_summary_
-
-        Create a matplotlib figure
-        Args:
-            figure_name (_type_): Figure name
-        """
-        
-        ## Figures
-        fig, ax = plt.subplots(self.PLOT_SAMPLES, self.NUM_DEVICES, constrained_layout=True)
-        
-        self.plots[figure_name] = (fig, ax)
+            ax.plot([0, val.real],[0, val.imag],'r.',markersize=2)
     
-    def plot_argand_diagram(self, figure_name, data):
+    def plot_IQ_constellation(self, title, data):
         """_summary_
 
         Plot the argand diagram.
@@ -67,7 +54,10 @@ class Visualiser(object):
             data (_type_): _description_
         """
         
-        fig, ax = self.plots[figure_name]
+        fig, ax = plt.subplots(self.PLOT_SAMPLES, self.NUM_DEVICES, constrained_layout=True)
+                
+        # Figure title
+        fig.suptitle(title)
         
         for device_num in range(self.NUM_DEVICES): 
             for p_sample, sample_num in enumerate(range((self.NUM_SAMPLES - self.PLOT_SAMPLES), self.NUM_SAMPLES)):
@@ -87,12 +77,12 @@ class Visualiser(object):
                 ax[p_sample][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
                 ax[p_sample][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
                 
-                limit = 0.25 # set limits for axis
+                limit = 1.5                                     # Set axis limits
                 ax[p_sample][device_num].set_xlim((-limit,limit))
                 ax[p_sample][device_num].set_ylim((-limit,limit))
         plt.show()
     
-    def plot_fft(self, figure_name, fft, f):
+    def plot_fft(self, title, fft, f):
         """_summary_
         
         Plot the FFT diagram
@@ -103,8 +93,11 @@ class Visualiser(object):
         """
         
         # Get figure and axes
-        fig, ax = self.plots[figure_name]
+        fig, ax = plt.subplots(self.PLOT_SAMPLES, self.NUM_DEVICES, constrained_layout=True)
         
+        # Figure title
+        fig.suptitle(title)
+
         f = f / (10 ** 6)                                           # Frequency in MHz        
         
         for device_num in range(self.NUM_DEVICES): 
@@ -113,8 +106,8 @@ class Visualiser(object):
                 # FFT for each sample
                 y = fft[device_num][sample_num]   
                 y = y / len(y)
-                
                 # Plot Data
+                
                 ax[p_sample][device_num].plot(f, np.abs(y), color='blue')      
                 
                 # Plot Labels
