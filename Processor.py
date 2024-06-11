@@ -56,6 +56,8 @@ class Processor(object):
         self.streams = []                                                                                                    # List of HackRF Streams
         
         self.freq = np.arange(-self.SAMPLE_RATE / 2,  self.SAMPLE_RATE / 2, self.SAMPLE_RATE / self.N)                       # Frequencies
+        self.freq += CENTRE_FREQ
+        
         self.data = np.empty((self.NUM_DEVICES, self.NUM_SAMPLES, self.N), np.complex64)                                     # Raw Data
         self.fft = FFT(self.NUM_DEVICES, self.N, self.NUM_SAMPLES)                                                                                               # FFT Data
 
@@ -98,7 +100,10 @@ class Processor(object):
         """
         
         # Retrieve device information for each detected HackRF
-        for device_num, hackRF in enumerate(self.sdr):
+        for device_num, board_name in enumerate(self.sdr):
+            
+            # Get the hackrf board
+            hackRF = self.sdr[board_name].get_board()
             
             # Deactivate the stream
             hackRF.deactivateStream(self.streams[device_num])
@@ -117,34 +122,30 @@ class Processor(object):
         """
         
         buff = np.zeros(self.N, np.complex64)                                                 # Re-usable Buffer
-                
-        print(f'\nTaking samples from {device}....')
+        
         try:
-            
+    
             # Retrieve 10 samples
             for i in range(self.NUM_SAMPLES):                    
-                            
-                # Retrieve device information for each detected HackRF
+                    
                 for n_device, device in enumerate(self.sdr):
                     
                     # Retrieve selected HackRF
                     hackrf = self.sdr[device].get_board()
-                    hackrf.readStream(self.stream, [buff], len(buff))
+                    hackrf.readStream(self.streams[n_device], [buff], len(buff))
                     
-                    self.data[n_device][i] = buff / self.N
+                    self.data[n_device][i] = buff
                     self.fft.set_fft_sample(n_device, i, buff)
                         
-                buff = np.zeros(self.N, np.complex64) 
+                    buff = np.zeros(self.N, np.complex64) 
 
         except Exception as e:
             
             print(f'The following error was found: {e}')
         finally:
+                        
+            return self.fft
         
-            # Add samples to data stack
-            print(f'\nDevice {n_device}\ndata: {self.data[n_device]}')            
-            print("---------------------------------\n")
-            
     def get_frequency(self):
         """_summary_
 
