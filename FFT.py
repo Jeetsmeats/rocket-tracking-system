@@ -36,6 +36,15 @@ class FFT(object):
         
         self.samples[num_device][num_sample] = fft(buffer) / self.N
 
+    def get_fft_sample(self):
+        """_summary_
+
+        Get the FFT sample.
+        Returns:
+            numpy.Array: FFT sample
+        """
+        return self.samples
+    
     def get_desired_freq_sample(self):
         pass
     
