@@ -77,13 +77,14 @@ def main():
     fft = processor.collect_samples()
     data = processor.get_data()
     freq = processor.get_frequency()
-    
+
     fft_sample = fft.get_fft_sample()
     
+    print(f'Data: {data}')
     processor.deactivate_boards()   
     
-    visuals.plot_IQ_constellation("IQ (HackRF A Clock Off) - $TEST 2$",data)
-    visuals.plot_fft("FFT (HackRF A Clock Off) - $TEST 2$",fft_sample, freq)
+    visuals.plot_IQ_constellation("IQ (Clock On) - Test 3",data)
+    visuals.plot_fft("FFT (Clock On) - Test 3",fft_sample, freq)
     
 if __name__ == "__main__":
     main()
