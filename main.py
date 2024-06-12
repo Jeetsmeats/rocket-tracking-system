@@ -37,9 +37,9 @@ def main():
     N = 1024                        # Number of IQ data points
     NUM_DEVICES = len(sdr)          # Number of connected devices
     CHANNEL = 0                     # Antenna channel
-    CENTRE_FREQ = 915e6           # Center Frequency
+    CENTRE_FREQ = 915e6             # Center Frequency
     BANDWIDTH = 10e6                # Bandwidth
-    SAMPLE_RATE = 10e6              # Sample Rate
+    SAMPLE_RATE = 20e6              # Sample Rate
 
     # Board Names
     BOARD_NAMES = [board_name for board_name in sdr]    
@@ -55,12 +55,16 @@ def main():
         CENTRE_FREQ,
         BANDWIDTH,
         SAMPLE_RATE,
-        1
     )
 
     # Data Visualisation Unit
     visuals = Visualiser(
-        PLOT_SAMPLES, NUM_DEVICES, NUM_SAMPLES, BOARD_NAMES
+        PLOT_SAMPLES,
+        NUM_DEVICES,
+        N,
+        NUM_SAMPLES,
+        SAMPLE_RATE,
+        BOARD_NAMES
     )
     
     ## Data objects
@@ -80,11 +84,13 @@ def main():
 
     fft_sample = fft.get_fft_sample()
     
-    print(f'Data: {data}')
     processor.deactivate_boards()   
     
-    visuals.plot_IQ_constellation("IQ (Clock On) - Test 3",data)
-    visuals.plot_fft("FFT (Clock On) - Test 3",fft_sample, freq)
+    ## Visualisation
+    visuals.plot_IQ_constellation("IQ",data)
+    visuals.plot_fft("FFT",fft_sample, freq)
+    visuals.plot_psd("PSD",fft_sample, freq)
     
+    plt.show()
 if __name__ == "__main__":
     main()

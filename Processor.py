@@ -24,7 +24,6 @@ class Processor(object):
                  CENTRE_FREQ, 
                  BANDWIDTH,
                  SAMPLE_RATE,
-                 res_factor
                  ):
         """_summary_
         Initialise the processing unit.
@@ -38,12 +37,11 @@ class Processor(object):
             CENTER_FREQ (_type_): _description_
             BANDWIDTH (_type_): _description_
             SAMPLE_RATE (_type_): _description_
-            res_factor (_type_): Factor to change the data point resolution.
         """
         
         ## Constants   
         self.NUM_SAMPLES = NUM_SAMPLES              # Number of samples
-        self.N = N * res_factor                     # Number of IQ datapoints
+        self.N = N                                  # Number of IQ datapoints
         self.NUM_DEVICES = NUM_DEVICES              # Number _summary_of connected devices
         self.CHANNEL = CHANNEL                      # Antenna Channel
         self.CENTRE_FREQ = CENTRE_FREQ              # Center Frequency
@@ -59,7 +57,7 @@ class Processor(object):
         self.freq += CENTRE_FREQ
         
         self.data = np.empty((self.NUM_DEVICES, self.NUM_SAMPLES, self.N), np.complex64)                                     # Raw Data
-        self.fft = FFT(self.NUM_DEVICES, self.N, self.NUM_SAMPLES)                                                                                               # FFT Data
+        self.fft = FFT(self.NUM_DEVICES, self.N, self.SAMPLE_RATE, self.NUM_SAMPLES)                                                                                               # FFT Data
 
     def activate_boards(self):
         

@@ -4,17 +4,19 @@ from numpy.fft import fft
 
 class FFT(object):
     
-    def __init__(self, NUM_DEVICES, N, NUM_SAMPLES=0):
+    def __init__(self, NUM_DEVICES, N, SAMPLE_RATE, NUM_SAMPLES=0):
         """_summary_
 
         Args:
             NUM_DEVICES (_type_): _description_
             N (_type_): _description_
-            NUM_SAMPLES (int, optional): _description_. Defaults to 10.
+            SAMPLE_RATE (_type_): _description_
+            NUM_SAMPLES (int, optional): _description_. Defaults to 0.
         """
         
         # Properties
         self.N = N
+        self.SAMPLE_RATE = SAMPLE_RATE
         
         if not NUM_SAMPLES:
             
@@ -34,7 +36,7 @@ class FFT(object):
             buffer (_type_): _description_
         """
         
-        self.samples[num_device][num_sample] = fft(buffer) / self.N
+        self.samples[num_device][num_sample] = fft(buffer)
 
     def get_fft_sample(self):
         """_summary_
