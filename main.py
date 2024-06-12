@@ -42,49 +42,93 @@ def main():
     # Board Names
     BOARD_NAMES = [board_name for board_name in sdr]    
     
-    ## Functional objects
-    # Processing Unit
-    processor = Processor(
-        sdr,
-        N,
-        NUM_DEVICES,
-        CHANNEL,
-        CENTRE_FREQ,
-        BANDWIDTH,
-        SAMPLE_RATE,
-        NUM_SAMPLES
-    )
+    is_collecting_samples = input("Collect samples? [y]/[n] ")
+    
+    if is_collecting_samples == "y" or is_collecting_samples == "yes":
+        
+        # Processing Unit
+        processor = Processor(
+            sdr,
+            N,
+            NUM_DEVICES,
+            CHANNEL,
+            CENTRE_FREQ,
+            BANDWIDTH,
+            SAMPLE_RATE,
+            NUM_SAMPLES
+        )
 
-    # Data Visualisation Unit
-    visuals = Visualiser(
-        PLOT_SAMPLES,
-        NUM_DEVICES,
-        BOARD_NAMES,
-        NUM_SAMPLES
-    )
-    
-    ## Data objects
-    
-    ## Main Logic
-    
-    # COMPLETE LOOP FOR REAL TIME TRACKING
-    # while True:
-    #     pass
-    
-    ## Processing 
-    processor.activate_boards()
-    
-    fft = processor.collect_samples()
-    data = processor.get_data()
-    freq = processor.get_frequency()
+        # Data Visualisation Unit
+        visuals = Visualiser(
+            NUM_DEVICES,
+            N,
+            SAMPLE_RATE,
+            BOARD_NAMES,
+            PLOT_SAMPLES,
+            NUM_SAMPLES
+        )
+        
+        ## Processing 
+        processor.activate_boards()
+        
+        fft = processor.collect_samples()
+        data = processor.get_data()
+        freq = processor.get_frequency()
 
-    fft_sample = fft.get_fft_sample()
-    
-    print(f'Data: {data}')
-    processor.deactivate_boards()   
-    
-    visuals.plot_IQ_constellation("IQ (Clock On) - Test 3",data)
-    visuals.plot_fft("FFT (Clock On) - Test 3",fft_sample, freq)
-    
+        fft_sample = fft.get_fft_sample()
+        
+        processor.deactivate_boards()   
+        
+        visuals.plot_IQ_constellation("IQ",data)
+        visuals.plot_fft("FFT",fft_sample, freq)
+        visuals.plot_psd("PSD",fft_sample, freq)
+        
+    else:
+        
+        # Processing Unit
+        processor = Processor(
+            sdr,
+            N,
+            NUM_DEVICES,
+            CHANNEL,
+            CENTRE_FREQ,
+            BANDWIDTH,
+            SAMPLE_RATE,
+        )
+
+        # Data Visualisation Unit
+        visuals = Visualiser(
+            NUM_DEVICES,
+            N,
+            SAMPLE_RATE,
+            BOARD_NAMES,
+        )
+        
+        ## Processing 
+        freq = processor.get_frequency()
+        
+        processor.activate_boards()
+        
+        print("Begin streaming.")
+        print("----------------")
+        # LOOP FOR REAL TIME TRACKING
+        while True:
+            
+            
+            fft = processor.sample()
+            data = processor.get_data()
+
+            fft_sample = fft.get_fft_sample()
+            
+            visuals.plot_all("Real time RF data", fft_sample, data, freq)
+            if keyboard.is_pressed('q'):
+                
+                print("Exiting stream.")
+                print("----------------")
+                
+                break
+            
+        processor.deactivate_boards()   
+
 if __name__ == "__main__":
     main()

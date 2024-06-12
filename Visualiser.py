@@ -10,22 +10,24 @@ class Visualiser(object):
     Visualisation of data stream
     """
     
-    def __init__(self, PLOT_SAMPLES, NUM_DEVICES, N, SAMPLE_RATE, SDR_NAMES, NUM_SAMPLES=None):
+    def __init__(self, NUM_DEVICES, N, SAMPLE_RATE, SDR_NAMES, PLOT_SAMPLES=None, NUM_SAMPLES=None):
         """_summary_
 
         Args:
-            PLOT_SAMPLES (_type_): _description_
             NUM_DEVICES (_type_): _description_
-            NUM_SAMPLES (_type_): _description_
-            SAMPLE_RATESDR_NAMES (_type_): _description_
+            N (_type_): _description_
+            SAMPLE_RATE (_type_): _description_
+            SDR_NAMES (_type_): _description_
+            PLOT_SAMPLES (_type_, optional): _description_. Defaults to None.
+            NUM_SAMPLES (_type_, optional): _description_. Defaults to None.
         """
         
         # Properties
         
-        if NUM_SAMPLES is not None:
+        if NUM_SAMPLES is not None and PLOT_SAMPLES is not None:
             self.NUM_SAMPLES = NUM_SAMPLES
+            self.PLOT_SAMPLES = PLOT_SAMPLES
             
-        self.PLOT_SAMPLES = PLOT_SAMPLES
         self.NUM_DEVICES = NUM_DEVICES
         self.N = N
         self.SAMPLE_RATE = SAMPLE_RATE
@@ -161,5 +163,41 @@ class Visualiser(object):
                 # Grid Lines
                 ax[p_sample][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
                 ax[p_sample][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
+    
+    def streamed_plots(self, title, fft, data, f):
+        """_summary_
+
+        Args:
+            title (_type_): _description_
+            fft (_type_): _description_
+            data (_type_): _description_
+            f (_type_): _description_
+        """
+        
+        n_plot_types = 3
+        # Get figure and axes
+        fig, ax = plt.subplots(n_plot_types, self.NUM_DEVICES, constrained_layout=True)
+        
+        # Figure title
+        fig.suptitle(title)
+        
+        # Create the plot
+        for device_num in range(self.NUM_DEVICES): 
                 
+            # Raw Data
+            data_sample = data[device_num]
+            
+            # FFT for each sample
+            fft_sample = fft[device_num]
+            fft_sample = fftshift(fft_sample)
+            
+            fft_abs = np.abs(fft_sample) / (self.N * self.SAMPLE_RATE)              # Absolute value of s-domain data
+            
+            # Power Spectral Density (PSD)            
+            PSD = np.abs(fft_sample) / (self.N * self.SAMPLE_RATE)
+            PSD_log = 20.0 * np.log10(PSD)
+            
+            
+                
+            
                 
