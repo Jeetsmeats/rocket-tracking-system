@@ -16,34 +16,33 @@ class Processor(object):
     """
     
     def __init__(self, 
-                 sdr, 
-                 NUM_SAMPLES, 
+                 sdr,
                  N, 
                  NUM_DEVICES, 
                  CHANNEL, 
                  CENTRE_FREQ, 
                  BANDWIDTH,
                  SAMPLE_RATE,
-                 res_factor
+                 NUM_SAMPLES=None
                  ):
         """_summary_
-        Initialise the processing unit.
-        
+
         Args:
             sdr (_type_): _description_
-            NUM_SAMPLES (_type_): _description_
             N (_type_): _description_
             NUM_DEVICES (_type_): _description_
             CHANNEL (_type_): _description_
-            CENTER_FREQ (_type_): _description_
+            CENTRE_FREQ (_type_): _description_
             BANDWIDTH (_type_): _description_
             SAMPLE_RATE (_type_): _description_
-            res_factor (_type_): Factor to change the data point resolution.
+            NUM_SAMPLES (_type_, optional): _description_. Defaults to None.
         """
         
         ## Constants   
-        self.NUM_SAMPLES = NUM_SAMPLES              # Number of samples
-        self.N = N * res_factor                     # Number of IQ datapoints
+        if NUM_SAMPLES is not None:
+            self.NUM_SAMPLES = NUM_SAMPLES              # Number of samples
+            
+        self.N = N                                  # Number of IQ datapoints
         self.NUM_DEVICES = NUM_DEVICES              # Number _summary_of connected devices
         self.CHANNEL = CHANNEL                      # Antenna Channel
         self.CENTRE_FREQ = CENTRE_FREQ              # Center Frequency
@@ -57,10 +56,15 @@ class Processor(object):
         
         self.freq = np.arange(-self.SAMPLE_RATE / 2,  self.SAMPLE_RATE / 2, self.SAMPLE_RATE / self.N)                       # Frequencies
         self.freq += CENTRE_FREQ
-        
-        self.data = np.empty((self.NUM_DEVICES, self.NUM_SAMPLES, self.N), np.complex64)                                     # Raw Data
-        self.fft = FFT(self.NUM_DEVICES, self.N, self.NUM_SAMPLES)                                                                                               # FFT Data
-
+                
+        if NUM_SAMPLES is not None:             # Sampling
+            
+            self.fft = FFT(self.NUM_DEVICES, self.N, self.NUM_SAMPLES)                                                       # FFT Data
+            self.data = np.empty((self.NUM_DEVICES, self.NUM_SAMPLES, self.N), np.complex64)                                 # Raw Data
+        else:                                   # Streaming
+            self.fft = FFT(self.NUM_DEVICES, self.N)                                                                         # FFT Data
+            self.data = np.empty((self.NUM_DEVICES, self.N), np.complex64)                                                   # Raw Data
+            
     def activate_boards(self):
         
         # Activate the board streams
@@ -108,12 +112,32 @@ class Processor(object):
             # Deactivate the stream
             hackRF.deactivateStream(self.streams[device_num])
     
-    def run_stream(self):
+    def sample(self):
         """_summary_
         
         Enable and run data streaming for the SDR boards.
         """
-        pass
+        buff = np.zeros(self.N, np.complex64)                                                 # Re-usable Buffer
+        
+        try:              
+                    
+            for n_device, device in enumerate(self.sdr):
+                
+                # Retrieve selected HackRF
+                hackrf = self.sdr[device].get_board()
+                hackrf.readStream(self.streams[n_device], [buff], len(buff))
+                
+                self.data[n_device] = buff
+                self.fft.set_fft_sample(n_device, buff)
+                    
+                buff = np.zeros(self.N, np.complex64) 
+
+        except Exception as e:
+            
+            print(f'The following error was found: {e}')
+        finally:
+                        
+            return self.fft
     
     def collect_samples(self):
         """_summary_

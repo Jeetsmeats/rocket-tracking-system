@@ -1,9 +1,7 @@
 # Imports
 import matplotlib.pyplot as plt
-
-# Import SoapySDR SDR Support Library
-import SoapySDR
-from SoapySDR import *          #SOAPY_SDR_ constants
+import keyboard
+import time
 
 # Import Modules
 from HackRF import HackRF
@@ -48,19 +46,21 @@ def main():
     # Processing Unit
     processor = Processor(
         sdr,
-        NUM_SAMPLES,
         N,
         NUM_DEVICES,
         CHANNEL,
         CENTRE_FREQ,
         BANDWIDTH,
         SAMPLE_RATE,
-        1
+        NUM_SAMPLES
     )
 
     # Data Visualisation Unit
     visuals = Visualiser(
-        PLOT_SAMPLES, NUM_DEVICES, NUM_SAMPLES, BOARD_NAMES
+        PLOT_SAMPLES,
+        NUM_DEVICES,
+        BOARD_NAMES,
+        NUM_SAMPLES
     )
     
     ## Data objects

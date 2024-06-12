@@ -4,28 +4,30 @@ from numpy.fft import fft
 
 class FFT(object):
     
-    def __init__(self, NUM_DEVICES, N, NUM_SAMPLES=0):
+    def __init__(self, NUM_DEVICES, N, SAMPLE_RATE, NUM_SAMPLES=None):
         """_summary_
 
         Args:
             NUM_DEVICES (_type_): _description_
             N (_type_): _description_
-            NUM_SAMPLES (int, optional): _description_. Defaults to 10.
+            SAMPLE_RATE (_type_): _description_
+            NUM_SAMPLES (int, optional): _description_. Defaults to None.
         """
         
         # Properties
         self.N = N
+        self.SAMPLE_RATE = SAMPLE_RATE
         
-        if not NUM_SAMPLES:
+        if NUM_SAMPLES is not None:
             
              # Initialise FFT variable for real-time stream
-            self.data = np.empty((NUM_DEVICES, N), np.complex64)
+            self.samples = np.empty((NUM_DEVICES, N), np.complex64)
         else:
             
             # Initialise the FFT variable for simple sampling
             self.samples = np.empty((NUM_DEVICES, NUM_SAMPLES, N), np.complex64)                                     # Raw sample
         
-    def set_fft_sample(self, num_device, num_sample, buffer):
+    def set_fft_sample(self, buffer, num_device, num_sample=None):
         """_summary_
 
         Args:
@@ -34,7 +36,10 @@ class FFT(object):
             buffer (_type_): _description_
         """
         
-        self.samples[num_device][num_sample] = fft(buffer) / self.N
+        if num_sample is not None:
+            self.samples[num_device][num_sample] = fft(buffer)
+        else:
+            self.samples[num_device] = fft(buffer)
 
     def get_fft_sample(self):
         """_summary_
