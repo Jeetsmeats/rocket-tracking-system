@@ -34,6 +34,8 @@ class Visualiser(object):
         self.SAMPLE_RATE = SAMPLE_RATE
         self.SDR_NAMES = SDR_NAMES
         
+        self.plots = []
+        
         # Set up the animation plot for all figures
         n_plot_types = 3
         self.sup_figure, self.sup_axis = plt.subplots(n_plot_types, self.NUM_DEVICES, constrained_layout=True)
@@ -43,17 +45,29 @@ class Visualiser(object):
         
     def argand_diagram(self, input, ax):
         """_summary_
-        
-        Plot an argand diagram.  Used for IQ constellations.
+
         Args:
-            input (np.Array): Sample data
+            input (_type_): _description_
+            ax (_type_): _description_
         """
-        max = np.max(np.ceil(np.absolute(input)))
         for x in range(len(input)):
             
             val = input[x]
             ax.plot([0, val.real],[0, val.imag],'r.',markersize=2)
     
+    def argand_diagram_reset(self, input, p):
+        """_summary_
+
+        Args:
+            input (_type_): _description_
+            p (_type_): _description_
+        """
+        
+        for x in range(len(input)):
+            
+            val = input[x]
+            p.set_data([0, val.real],[0, val.imag])
+            
     def plot_IQ_constellation(self, title, data):
         """_summary_
 
@@ -200,7 +214,7 @@ class Visualiser(object):
             self.sup_axis[1][device_num].set_xlabel('$f (MHz)$')
             self.sup_axis[1][device_num].set_ylabel('Magnitude')
             
-            self.sup_axis[1][device_num].grid(which='major', color='#DDDDDD', linewidth=1.8)
+            self.sup_axis[1][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
             self.sup_axis[1][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
             
             # Sub plot (PSD)
@@ -208,13 +222,22 @@ class Visualiser(object):
             self.sup_axis[2][device_num].set_xlabel('$f (MHz)$')
             self.sup_axis[2][device_num].set_ylabel('Magnitude (dB)')
             
-            self.sup_axis[2][device_num].grid(which='major', color='#DDDDDD', linewidth=2.8)
+            self.sup_axis[2][device_num].grid(which='major', color='#DDDDDD', linewidth=0.8)
             self.sup_axis[2][device_num].grid(which='minor', color='#EEEEEE', linestyle=':', linewidth=0.5)
 
+            plot1, = self.sup_axis[0][device_num].plot([], [], 'r.', markersize=2)
+            plot2, = self.sup_axis[1][device_num].plot([], [], 'b')
+            plot3, = self.sup_axis[2][device_num].plot([], [], 'b')
+            
+            # Add empty plots
+            self.plots.append([plot1, plot2, plot3]) 
+        
         plt.ion()
+        
     def plot_all(self, fft, data, f):
         """_summary_
 
+        Real time plotting function.
         Args:
             title (_type_): _description_
             fft (_type_): _description_
@@ -223,14 +246,14 @@ class Visualiser(object):
         """
         
         f = f / (10 ** 6)                                           # Frequency in MHz        
-
+        
         # Create the figures
         for device_num in range(self.NUM_DEVICES): 
             
             # Erase previous plot
-            self.sup_axis[0][device_num].clear()
-            self.sup_axis[1][device_num].clear()
-            self.sup_axis[2][device_num].clear()
+            # self.sup_axis[0][device_num].clear()
+            # self.sup_axis[1][device_num].clear()
+            # self.sup_axis[2][device_num].clear()
             
             # Raw Data
             data_sample = data[device_num]
@@ -243,18 +266,16 @@ class Visualiser(object):
             
             # Power Spectral Density (PSD)            
             PSD = np.abs(fft_sample) / (self.N * self.SAMPLE_RATE)
-            PSD_log = 20.0 * np.log10(PSD)
+            # PSD_log = 20.0 * np.log10(PSD)
 
-            # # Plot IQ Constellation
-            self.argand_diagram(data_sample, self.sup_axis[0][device_num])     
+            # Plot IQ Constellation
+            self.argand_diagram_reset(data_sample, self.plots[device_num][0])     
         
             # Plot FFT
-            self.sup_axis[1][device_num].plot(f, fft_abs, color='blue')      
+            self.plots[device_num][1].set_data(f, fft_abs)      
       
             # Plot PSD
-            self.sup_axis[2][device_num].plot(f, PSD_log, color='blue') 
-            self.sup_figure.canvas.draw()
-            sleep(0.1)
-            
-        plt.show()
-        
+            self.plots[device_num][2].set_data(f, PSD) 
+
+            plt.draw()
+        sleep(0.5)

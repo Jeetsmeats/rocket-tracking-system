@@ -77,15 +77,11 @@ def main():
 
         fft_sample = fft.get_fft_sample()
 
-        print(fft_sample.shape)
-
         processor.deactivate_boards()   
         
         visuals.plot_IQ_constellation("IQ",data)
         visuals.plot_fft("FFT",fft_sample, freq)
         visuals.plot_psd("PSD",fft_sample, freq)
-        
-        plt.show()
     else:
         
         # Processing Unit
@@ -109,7 +105,7 @@ def main():
         
         # Create a super figure
         visuals.create_figure("Real Time Stream")
-        
+        plt.show()
         # Get frequencies
         freq = processor.get_frequency()
         
@@ -127,12 +123,13 @@ def main():
 
                 fft_sample = fft.get_fft_sample()
                 
-                visuals.plot_all(fft_sample, data, freq)
+                # visuals.plot_all(fft_sample, data, freq)
             except KeyboardInterrupt:
                 
                 print("Exiting stream.")
                 print("----------------")
 
+                plt.ioff()
                 processor.deactivate_boards()
                 break 
 
