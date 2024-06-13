@@ -1,6 +1,6 @@
 # Imports
 import numpy as np
-from numpy.fft import fft
+from numpy.fft import fft, fftshift
 
 class FFT(object):
     
@@ -15,25 +15,28 @@ class FFT(object):
         """
         
         # Properties
+        self.NUM_DEVICES = NUM_DEVICES
         self.N = N
         self.SAMPLE_RATE = SAMPLE_RATE
         
         if NUM_SAMPLES is not None:
             
-             # Initialise FFT variable for real-time stream
-            self.samples = np.empty((NUM_DEVICES, N), np.complex64)
-        else:
-            
             # Initialise the FFT variable for simple sampling
             self.samples = np.empty((NUM_DEVICES, NUM_SAMPLES, N), np.complex64)                                     # Raw sample
+            self.samples_shifted = self.samples
+        else:
+            
+            # Initialise FFT variable for real-time stream
+            self.samples = np.empty((NUM_DEVICES, N), np.complex64)
+            self.samples_shifted = self.samples
         
     def set_fft_sample(self, buffer, num_device, num_sample=None):
         """_summary_
 
         Args:
-            num_device (_type_): _description_
-            num_sample (_type_): _description_
             buffer (_type_): _description_
+            num_device (_type_): _description_
+            num_sample (_type_, optional): _description_. Defaults to None.
         """
         
         if num_sample is not None:
@@ -50,6 +53,24 @@ class FFT(object):
         """
         return self.samples
     
+    def apply_shifting(self):
+        """_summary_
+        
+        Apply the FFTShift on the FFT data.
+        """
+        
+        if self.samples.ndim > 2:
+            
+            for device in range(self.NUM_DEVICES):
+                for n_sample, sample in enumerate(self.samples[device]):
+                    
+                    self.samples[device][n_sample] = fftshift(sample)
+        else:
+            
+            for device in range(self.NUM_DEVICES):
+                    
+                self.samples[device] = fftshift(self.samples[device])
+                    
     def get_desired_freq_sample(self):
         pass
     

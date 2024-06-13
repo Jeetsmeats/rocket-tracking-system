@@ -59,10 +59,10 @@ class Processor(object):
                 
         if NUM_SAMPLES is not None:             # Sampling
             
-            self.fft = FFT(self.NUM_DEVICES, self.N, self.NUM_SAMPLES)                                                       # FFT Data
+            self.fft = FFT(self.NUM_DEVICES, self.N, self.SAMPLE_RATE, self.NUM_SAMPLES)                                     # FFT Data
             self.data = np.empty((self.NUM_DEVICES, self.NUM_SAMPLES, self.N), np.complex64)                                 # Raw Data
         else:                                   # Streaming
-            self.fft = FFT(self.NUM_DEVICES, self.N)                                                                         # FFT Data
+            self.fft = FFT(self.NUM_DEVICES, self.N, self.SAMPLE_RATE)                                                       # FFT Data
             self.data = np.empty((self.NUM_DEVICES, self.N), np.complex64)                                                   # Raw Data
             
     def activate_boards(self):
@@ -128,7 +128,7 @@ class Processor(object):
                 hackrf.readStream(self.streams[n_device], [buff], len(buff))
                 
                 self.data[n_device] = buff
-                self.fft.set_fft_sample(n_device, buff)
+                self.fft.set_fft_sample(buff, n_device)
                     
                 buff = np.zeros(self.N, np.complex64) 
 
@@ -159,7 +159,7 @@ class Processor(object):
                     hackrf.readStream(self.streams[n_device], [buff], len(buff))
                     
                     self.data[n_device][i] = buff
-                    self.fft.set_fft_sample(n_device, i, buff)
+                    self.fft.set_fft_sample(buff, n_device, i)
                         
                     buff = np.zeros(self.N, np.complex64) 
 

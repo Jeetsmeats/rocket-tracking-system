@@ -35,7 +35,7 @@ def main():
     N = 1024                        # Number of IQ data points
     NUM_DEVICES = len(sdr)          # Number of connected devices
     CHANNEL = 0                     # Antenna channel
-    CENTRE_FREQ = 915e6           # Center Frequency
+    CENTRE_FREQ = 905e6             # Center Frequency
     BANDWIDTH = 10e6                # Bandwidth
     SAMPLE_RATE = 10e6              # Sample Rate
 
@@ -76,13 +76,16 @@ def main():
         freq = processor.get_frequency()
 
         fft_sample = fft.get_fft_sample()
-        
+
+        print(fft_sample.shape)
+
         processor.deactivate_boards()   
         
         visuals.plot_IQ_constellation("IQ",data)
         visuals.plot_fft("FFT",fft_sample, freq)
         visuals.plot_psd("PSD",fft_sample, freq)
         
+        plt.show()
     else:
         
         # Processing Unit
@@ -104,9 +107,13 @@ def main():
             BOARD_NAMES,
         )
         
-        ## Processing 
+        # Create a super figure
+        visuals.create_figure("Real Time Stream")
+        
+        # Get frequencies
         freq = processor.get_frequency()
         
+        ## Processing 
         processor.activate_boards()
         
         print("Begin streaming.")
@@ -114,21 +121,20 @@ def main():
         # LOOP FOR REAL TIME TRACKING
         while True:
             
-            
-            fft = processor.sample()
-            data = processor.get_data()
+            try:
+                fft = processor.sample()
+                data = processor.get_data()
 
-            fft_sample = fft.get_fft_sample()
-            
-            visuals.plot_all("Real time RF data", fft_sample, data, freq)
-            if keyboard.is_pressed('q'):
+                fft_sample = fft.get_fft_sample()
+                
+                visuals.plot_all(fft_sample, data, freq)
+            except KeyboardInterrupt:
                 
                 print("Exiting stream.")
                 print("----------------")
-                
-                break
-            
-        processor.deactivate_boards()   
+
+                processor.deactivate_boards()
+                break 
 
 if __name__ == "__main__":
     main()
