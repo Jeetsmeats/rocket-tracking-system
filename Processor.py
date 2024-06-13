@@ -91,7 +91,7 @@ class Processor(object):
 
             ## Stream Data
             # Setup a stream (complex floats)
-            stream = hackrf.setupStream(SOAPY_SDR_RX, SOAPY_SDR_CF32)
+            stream = hackrf.setupStream(SOAPY_SDR_RX, SOAPY_SDR_CS32)
             self.streams.append(stream)
 
             # Start streaming 
@@ -117,7 +117,7 @@ class Processor(object):
         
         Enable and run data streaming for the SDR boards.
         """
-        buff = np.zeros(self.N, np.complex64)                                                 # Re-usable Buffer
+        buff = np.zeros(self.N, np.int16)                                                 # Re-usable Buffer
         
         try:              
                     
@@ -127,6 +127,7 @@ class Processor(object):
                 hackrf = self.sdr[device].get_board()
                 hackrf.readStream(self.streams[n_device], [buff], len(buff))
                 
+                print(buff)
                 self.data[n_device] = buff
                 self.fft.set_fft_sample(buff, n_device)
                     
