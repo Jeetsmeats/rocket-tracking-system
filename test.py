@@ -19,7 +19,7 @@ hackrf1.get_serial_no()
 hackrf2.get_serial_no()
 
 # take 131072 samples from both (arbitrary value, this is the default number)
-num_samples = 4096
+num_samples = 131072
 hackrf1.sample_rate = 20e6
 hackrf1.center_freq = 912e6
 hackrf2.sample_rate = 20e6

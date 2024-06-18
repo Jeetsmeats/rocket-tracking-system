@@ -1,10 +1,6 @@
 # Imports
 import numpy as np
 from numpy.fft import fft
- 
-# Import SoapySDR SDR Support Library
-import SoapySDR
-from SoapySDR import *          #SOAPY_SDR_ constants
 
 # Import modules
 from FFT import FFT
@@ -49,10 +45,7 @@ class Processor(object):
         self.BANDWIDTH = BANDWIDTH                  # Bandwidth (Maximum bandwidth)
         self.SAMPLE_RATE = SAMPLE_RATE              # Sample Rate (Maximum Sample Rate)
 
-        self.sdr = sdr                              # SDR Dictionary
-        
-        ## Variables
-        self.streams = []                                                                                                    # List of HackRF Streams
+        self.sdr = sdr                              # SDR Dictionary                                                                                                  # List of HackRF Streams
         
         self.freq = np.arange(-self.SAMPLE_RATE / 2,  self.SAMPLE_RATE / 2, self.SAMPLE_RATE / self.N)                       # Frequencies
         self.freq += CENTRE_FREQ
@@ -74,50 +67,15 @@ class Processor(object):
             # Retrieve selected HackRF
             hackrf = self.sdr[device].get_board()
             
-            # Apply settings
-            hackrf.setSampleRate(SOAPY_SDR_RX, self.CHANNEL, self.SAMPLE_RATE)
-            hackrf.setFrequency(SOAPY_SDR_RX, self.CHANNEL, self.CENTRE_FREQ)
-            hackrf.setBandwidth(SOAPY_SDR_RX, self.CHANNEL, self.BANDWIDTH)
-            
-            # Get current board settings
-            fq_range = hackrf.getFrequencyRange(SOAPY_SDR_RX, 0) 
-            ant_det = hackrf.listAntennas(SOAPY_SDR_RX, 0)
-            
-            # Print settings
-            print(f'\nHACKRF DEVICE: {device}\n',
-                '------------------------------')
-            print(f'Frequency Range: {fq_range[0].minimum()}-{fq_range[0].maximum()}')
-            print(f'Antenna Details: {ant_det}')
-
-            ## Stream Data
-            # Setup a stream (complex floats)
-            stream = hackrf.setupStream(SOAPY_SDR_RX, SOAPY_SDR_CS32)
-            self.streams.append(stream)
-
-            # Start streaming 
-            hackrf.activateStream(stream)
-            
-    def deactivate_boards(self):
-        """_summary_
+            hackrf.sample_rate = self.SAMPLE_RATE
+            hackrf.center_freq = self.CENTRE_FREQ
         
-        Deactivate streaming for all SDR boards.
-        """
-        
-        # Retrieve device information for each detected HackRF
-        for device_num, board_name in enumerate(self.sdr):
-            
-            # Get the hackrf board
-            hackRF = self.sdr[board_name].get_board()
-            
-            # Deactivate the stream
-            hackRF.deactivateStream(self.streams[device_num])
-    
     def sample(self):
         """_summary_
         
         Enable and run data streaming for the SDR boards.
         """
-        buff = np.zeros(self.N, np.int16)                                                 # Re-usable Buffer
+        buff = np.zeros(self.N, np.complex128)                                                 # Re-usable Buffer
         
         try:              
                     
@@ -125,14 +83,12 @@ class Processor(object):
                 
                 # Retrieve selected HackRF
                 hackrf = self.sdr[device].get_board()
-                hackrf.readStream(self.streams[n_device], [buff], len(buff))
+                buff = hackrf.read_samples(self.N)
                 
-                print(buff)
                 self.data[n_device] = buff
                 self.fft.set_fft_sample(buff, n_device)
-                    
-                buff = np.zeros(self.N, np.complex64) 
-
+                
+                buff = np.zeros(self.N, np.complex128)                                                 # Re-usable Buffer
         except Exception as e:
             
             print(f'The following error was found: {e}')
@@ -157,12 +113,12 @@ class Processor(object):
                     
                     # Retrieve selected HackRF
                     hackrf = self.sdr[device].get_board()
-                    hackrf.readStream(self.streams[n_device], [buff], len(buff))
+                    buff = hackrf.read_samples(self.N)
                     
                     self.data[n_device][i] = buff
                     self.fft.set_fft_sample(buff, n_device, i)
                         
-                    buff = np.zeros(self.N, np.complex64) 
+                    buff = np.zeros(self.N, np.complex128)                                                 # Re-usable Buffer
 
         except Exception as e:
             

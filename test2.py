@@ -1,42 +1,53 @@
-import SoapySDR
+from pyhackrf2 import HackRF
+from pylab import *
+import numpy as np
+from time import sleep
 
-from SoapySDR import * #SOAPY_SDR_ constants
-import numpy #use numpy for buffers
+hackrf1 = HackRF(device_index=0)
+hackrf2 = HackRF(device_index=1)
 
-#enumerate devices
-results = SoapySDR.Device.enumerate()
-for result in results: print(result)
+print(hackrf1.get_serial_no())
+print(hackrf2.get_serial_no())
+# take 131072 samples from both (arbitrary value, this is the default number)
 
-#create device instance
-#args can be user defined or from the enumeration result
-args = dict(driver="hackrf")
-sdr = SoapySDR.Device(args)
+num_samples = 10 ** 5
+hackrf1.sample_rate = 20e6
+hackrf1.center_freq = 915e6
+hackrf2.sample_rate = 20e6
+hackrf2.center_freq = 915e6
+samples1 = hackrf1.read_samples(num_samples)
+samples2 = hackrf2.read_samples(num_samples)
 
-#query device info
-print(sdr.listAntennas(SOAPY_SDR_RX, 0))
-print(sdr.listGains(SOAPY_SDR_RX, 0))
-freqs = sdr.getFrequencyRange(SOAPY_SDR_RX, 0)
-for freqRange in freqs: print(freqRange)
+print(samples1)
+print(samples2)
+t = linspace(0, (num_samples - 1) / hackrf1.sample_rate, num_samples)
+# real and imaginary components of both samples
+real_array_1 = real(samples1)
+imag_array_1 = imag(samples1)
+real_array_2 = real(samples2)
+imag_array_2 = imag(samples2)
 
-#apply settings
-sdr.setSampleRate(SOAPY_SDR_RX, 0, 1e6)
-sdr.setFrequency(SOAPY_SDR_RX, 0, 912.3e6)
+figure()
+plot(t, real_array_2)
+plot(t, real_array_1)
+xlabel("Seconds")
+ylabel("Real Value")
+title("I Time Series - Parallel Clock")
 
-#setup a stream (complex floats)
-rxStream = sdr.setupStream(SOAPY_SDR_RX, SOAPY_SDR_CF32)
-sdr.activateStream(rxStream) #start streaming
+figure()
+plot(t, imag_array_2)
+plot(t, imag_array_1)
+xlabel("Seconds")
+ylabel("Imag Value")
+title("Q Time Series - Parallel Clock")
 
-#create a re-usable buffer for rx samples
-buff = numpy.array([0]*1024, numpy.complex64)
+figure()
+scatter(real_array_1, imag_array_1)
+scatter(real_array_2, imag_array_2)
+xlabel("Real")
+ylabel("Imaginary")
+title("IQ Constellation - Parallel Clock")
 
-#receive some samples
-for i in range(10):
-    sr = sdr.readStream(rxStream, [buff], len(buff))
-    print(sr.ret) #num samples or error code
-    print(sr.flags) #flags set by receive operation
-    print(sr.timeNs) #timestamp for receive buffer
-
-#shutdown the stream
-sdr.deactivateStream(rxStream) #stop streaming
-sdr.closeStream(rxStream)
-
+show()
+show()
+show()

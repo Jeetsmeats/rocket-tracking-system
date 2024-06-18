@@ -1,13 +1,13 @@
-# Imports
-import SoapySDR
+# Import PyHackRF
+from pyhackrf2 import HackRF
 
-class HackRF(object):
+class SDR(object):
     """_summary_
     
     Class wrapper for the HackRF Boards
     """
     
-    def __init__(self, name, serial_tag):
+    def __init__(self, device_index, name, serial_tag):
         """_summary_
 
         Instantiate a HackRF Board
@@ -16,8 +16,7 @@ class HackRF(object):
             name (_type_): _description_
             serial_tag (string): _description_            
         """
-        arg = dict(driver="hackrf", serial=serial_tag)
-        self.board = SoapySDR.Device(arg)
+        self.board = HackRF(device_index=device_index)
         self.name = name
         self.serial_tag = serial_tag
         
