@@ -35,15 +35,14 @@ def main():
     N = 10 ** 5                     # Number of IQ data points
     NUM_DEVICES = len(sdr)          # Number of connected devices
     CHANNEL = 0                     # Antenna channel
-    CENTRE_FREQ = 912.5e6           # Center Frequency
+    CENTRE_FREQ = 915e6             # Center Frequency
     BANDWIDTH = 10e6                # Bandwidth
-    SAMPLE_RATE = 10e6              # Sample Rate
+    SAMPLE_RATE = 20e6              # Sample Rate
 
     # Board Names
     BOARD_NAMES = [board_name for board_name in sdr]    
     
     is_collecting_samples = input("Collect samples? [y]/[n] ")
-    
     if is_collecting_samples == "y" or is_collecting_samples == "yes":
         
         # Processing Unit

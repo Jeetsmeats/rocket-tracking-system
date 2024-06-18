@@ -160,7 +160,7 @@ class Visualiser(object):
         fig.suptitle(title)
 
         f = f / (10 ** 6)                                           # Frequency in MHz        
-        
+
         for device_num in range(self.NUM_DEVICES): 
             for p_sample, sample_num in enumerate(range((self.NUM_SAMPLES - self.PLOT_SAMPLES), self.NUM_SAMPLES)):
                 

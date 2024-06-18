@@ -37,7 +37,6 @@ class Processor(object):
         ## Constants   
         if NUM_SAMPLES is not None:
             self.NUM_SAMPLES = NUM_SAMPLES              # Number of samples
-            
         self.N = N                                  # Number of IQ datapoints
         self.NUM_DEVICES = NUM_DEVICES              # Number _summary_of connected devices
         self.CHANNEL = CHANNEL                      # Antenna Channel
@@ -49,7 +48,7 @@ class Processor(object):
         
         self.freq = np.arange(-self.SAMPLE_RATE / 2,  self.SAMPLE_RATE / 2, self.SAMPLE_RATE / self.N)                       # Frequencies
         self.freq += CENTRE_FREQ
-                
+
         if NUM_SAMPLES is not None:             # Sampling
             
             self.fft = FFT(self.NUM_DEVICES, self.N, self.SAMPLE_RATE, self.NUM_SAMPLES)                                     # FFT Data
@@ -57,6 +56,7 @@ class Processor(object):
         else:                                   # Streaming
             self.fft = FFT(self.NUM_DEVICES, self.N, self.SAMPLE_RATE)                                                       # FFT Data
             self.data = np.empty((self.NUM_DEVICES, self.N), np.complex64)                                                   # Raw Data
+
             
     def activate_boards(self):
         

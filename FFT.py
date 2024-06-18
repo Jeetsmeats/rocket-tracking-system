@@ -5,6 +5,7 @@ from numpy.fft import fft, fftshift
 class FFT(object):
     
     def __init__(self, NUM_DEVICES, N, SAMPLE_RATE, NUM_SAMPLES=None):
+
         """_summary_
 
         Args:
