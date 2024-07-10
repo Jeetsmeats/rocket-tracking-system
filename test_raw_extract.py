@@ -19,17 +19,17 @@ hackrf_C_file = "./shell_files/07cf.raw"
 # time.sleep(10)
 
 # opening the file in read mode
-hackrf_A = open(hackrf_A_file, "rb+")
-hackrf_C = open(hackrf_C_file, "rb+")
+hackrf_A = open(hackrf_A_file, "a")
+hackrf_C = open(hackrf_C_file, "a")
 
 while True:
     
     hackrf_A_buffer = np.fromfile(hackrf_A_file, dtype="uint8")
     hackrf_C_buffer = np.fromfile(hackrf_C_file, dtype="uint8")
     
-    hackrf_A.truncate()
-    hackrf_C.truncate()
-    
+    hackrf_A.truncate(0)
+    hackrf_C.truncate(0)
+
     hackrf_A_data = np.array(hackrf_A_buffer).astype(np.int8)
     hackrf_C_data = np.array(hackrf_C_buffer).astype(np.int8)
     
@@ -38,7 +38,6 @@ while True:
     time.sleep(1)
     
     
-
 # plt.subplot(1, 2, 1)
 
 # plt.plot(hackrf_A_data)
