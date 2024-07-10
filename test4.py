@@ -9,9 +9,9 @@ def read_hackrf(hackrf):
     hackrf.sample_rate = int(10e6)
     hackrf.centre_freq = int(915e6)
 
-    samples1 = hackrf.read_samples(8192)
+    samples = hackrf.read_samples(8192)
     
-    print(samples1)
+    print(samples)
     
 def main():
     
