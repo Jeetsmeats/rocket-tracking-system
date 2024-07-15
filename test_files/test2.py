@@ -37,6 +37,7 @@ samples2 = hackrf2.read_samples(num_samples)
 data = pd.DataFrame({"Phase Difference": []})
 phase_diff = []
 
+
 for i in range(50):
     samples1 = hackrf1.read_samples(num_samples)
     samples2 = hackrf2.read_samples(num_samples)
@@ -54,6 +55,7 @@ for i in range(50):
     
 data["Phase Difference"] = phase_diff
 data.to_csv("Phase Values")
+
 
 # print(samples2)
 # t = linspace(0, (num_samples - 1) / hackrf1.sample_rate, num_samples)
