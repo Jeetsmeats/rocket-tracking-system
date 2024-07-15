@@ -23,3 +23,5 @@ A/Prof Marcus Brazil
 * Board synchronisation: https://github.com/greatscottgadgets/hackrf/issues/1340
 ## Relevant Information
 * Here is some relevant information regarding Quadrature Sampling: https://pysdr.org/content/sampling.html
+* Named Pipes: https://www.linuxjournal.com/article/2156
+* Australilan RF Regulation: https://www.acma.gov.au/sites/default/files/2021-07/Australian%20Radiofrequency%20Spectrum%20Plan%202021_Including%20general%20information.pdf
