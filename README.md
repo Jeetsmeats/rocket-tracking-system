@@ -25,3 +25,5 @@ A/Prof Marcus Brazil
 * Here is some relevant information regarding Quadrature Sampling: https://pysdr.org/content/sampling.html
 * Named Pipes: https://www.linuxjournal.com/article/2156
 * Australilan RF Regulation: https://www.acma.gov.au/sites/default/files/2021-07/Australian%20Radiofrequency%20Spectrum%20Plan%202021_Including%20general%20information.pdf
+* MQTT Broker Set Up: https://medium.com/gravio-edge-iot-platform/how-to-set-up-a-mosquitto-mqtt-broker-securely-using-client-certificates-82b2aaaef9c8
+* 
