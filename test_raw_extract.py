@@ -4,8 +4,7 @@ from multiprocessing import Process
 import time
 import subprocess
 from multiprocessing import Process, Queue
-
-start = time.time()
+import paho
 
 def read_pipe(pipe_path, q):
     
@@ -73,16 +72,17 @@ def main():
     
     data_A_I = data_A[0::2]
     data_A_Q = data_A[1::2]
+    
     plt.subplot(1, 2, 1)
-    plt.plot(data_C_I[:100000], label="In-Phase")
-    plt.plot(data_C_Q[:100000], label="Quadrature")
+    plt.plot(data_C_I[:1000000], label="In-Phase")
+    plt.plot(data_C_Q[:1000000], label="Quadrature")
     plt.xlabel("N (Datapoints)")
     plt.ylabel("Magnitude")
     plt.title("HackRF C Data")
     
     plt.subplot(1, 2, 2)
-    plt.plot(data_A_I[:100000], label="In-Phase")
-    plt.plot(data_A_Q[:100000], label="Quadrature")
+    plt.plot(data_A_I[:1000000], label="In-Phase")
+    plt.plot(data_A_Q[:1000000], label="Quadrature")
     plt.xlabel("N (Datapoints)")
     plt.ylabel("Magnitude")
     plt.title("HackRF A Data")
