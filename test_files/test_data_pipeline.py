@@ -5,19 +5,19 @@ from multiprocessing import Process
 import paho.mqtt.client as paho
 from paho import mqtt
 import random
+import time
 
-
-def gen_signal(topic, board):
+def gen_signal(id, topic, board):
     broker = "192.168.1.142"
     port = 1883
 
-    client = paho.Client(client_id="", protocol=paho.MQTTv5)
+    client = paho.Client(client_id=id, protocol=paho.MQTTv5)
     client.on_connect = on_connect
     client.connect(broker, port)
 
-    f = 915000000
+    f = 100
     w = 2 * np.pi * f
-    t = np.arange(0, 100000, 1)
+    t = np.linspace(0, 1, 200)
     x = t * np.pi / 180
 
     while True:
@@ -25,19 +25,20 @@ def gen_signal(topic, board):
 
         sig = np.sin(w * x + random_phase)
 
-        random_noise = np.random.normal(0, 5, len(t))
+        random_noise = np.random.normal(0, 1, len(t))
 
         noisy_signal = sig + random_noise
 
-        fft_signal = fft(noisy_signal)
-        desired_freq = fft_signal[0]
+        fft_signal = fft(noisy_signal, 4096)
+        fft_shifted = fftshift(fft_signal)
+        phase = random_phase
 
-        phase = np.arctan2(np.imag(desired_freq), np.real(desired_freq))
+        client.publish(topic, f'Phase value {random_phase} from {board}')
 
-        client.publish(topic, f'Phase value {phase} from {board}')
-
+        time.sleep(1)
 
 def on_connect(rc):
+
     if rc == 0:
         print("Connected to MQTT Broker!")
     else:
@@ -45,16 +46,17 @@ def on_connect(rc):
 
 
 def main():
-    topic = "topic/test1"
+    topic = "test/topic1"
 
-    process1 = Process(target=gen_signal, args=(topic, "board A"))
-    process2 = Process(target=gen_signal, args=(topic, "board B"))
-    process3 = Process(target=gen_signal, args=(topic, "board C"))
+    process1 = Process(target=gen_signal, args=("4083e8a8d0dc", topic, "board A"))
+    process2 = Process(target=gen_signal, args=("fe91eb8bc508", topic, "board B"))
+    process3 = Process(target=gen_signal, args=("f265020c6a9c", topic, "board C"))
 
     process1.start()
     process2.start()
     process3.start()
 
+    gen_signal("ad13a4cc4122", topic, "board D")
 
 if __name__ == "__main__":
     main()
