@@ -54,19 +54,16 @@ def on_connect(rc):
 
 def main():
     topic = "test/topic"
-    
-    mqtt_id_1 = "4083e8a8d0dc"
-    mqtt_id_2 = "fe91eb8bc508"
+
     mqtt_id_3 = "f265020c6a9c"
     mqtt_id_4 = "ad13a4cc4122"
     
     pipe_A_path = "./shell_files/pipes/hackrfA.pipe"
     pipe_B_path = "./shell_files/pipes/hackrfB.pipe"
-    pipe_C_path = "./shell_files/pipes/hackrfC.pipe"
-    pipe_D_path = "./shell_files/pipes/hackrfD.pipe"
     
     mqtt_address = "10.12.19.190"
 
+    print("Starting HackRF B")
     process = Process(target=process_signal, args=(mqtt_id_3, topic, "board B", pipe_B_path , mqtt_address))
 
     print("Starting HackRF A")
