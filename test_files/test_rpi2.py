@@ -4,14 +4,25 @@ from matplotlib import pyplot as plt
 from multiprocessing import Process
 import paho.mqtt.client as paho
 from paho import mqtt
+import RPi.GPIO as GPIO
 import random
 import time
 import subprocess
 
 def process_signal(id, topic, board, pipe_path, address):
+    
+     # Set the synchronisation testing pin
+    test_pin = 12
+    
+    # Set up GPIO
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(test_pin, GPIO.OUT)
+    
+    # Set the broker address and mqtt port
     broker = address
     port = 1883
 
+    # Connect to broker
     client = paho.Client(client_id=id, protocol=paho.MQTTv5)
     client.on_connect = on_connect
     client.connect(broker, port)
@@ -24,26 +35,24 @@ def process_signal(id, topic, board, pipe_path, address):
         
         while True:
             
-            raw_data = bytearray(pipe.read(8*1024))
-            data = np.append(data, np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128))
+            raw_data = bytearray(pipe.read(2*8*1024))
+            data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
+                
+            # I = data[0::2]
+            # Q = data[1::2]
+            
+            # FFT Test Pulse
+            GPIO.output(test_pin, GPIO.HIGH)
+            fft_signal = fft(data, 1024)
+            GPIO.output(test_pin, GPIO.LOW)
+            
+            real = np.real(fft_signal[len(fft_signal) // 2])
+            imag = np.imag(fft_signal[len(fft_signal) // 2])
 
-            if len(data) > 100000:
+            client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+            
+            data = np.array([])
                 
-                I = data[0::2]
-                Q = data[1::2]
-                
-                
-                fft_signal = fft(data, 1024)
-                
-                real = np.real(fft_signal[len(fft_signal) // 2])
-                imag = np.imag(fft_signal[len(fft_signal) // 2])
-
-                client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
-                
-                data = np.array([])
-                time.sleep(0.05)
-                
-
 def on_connect(rc):
 
     if rc == 0:
@@ -53,21 +62,26 @@ def on_connect(rc):
 
 
 def main():
+        
     topic = "test/topic"
-
+    
+    mqtt_id_1 = "4083e8a8d0dc"
+    mqtt_id_2 = "fe91eb8bc508"
     mqtt_id_3 = "f265020c6a9c"
     mqtt_id_4 = "ad13a4cc4122"
     
     pipe_A_path = "./shell_files/pipes/hackrfA.pipe"
     pipe_B_path = "./shell_files/pipes/hackrfB.pipe"
+    pipe_C_path = "./shell_files/pipes/hackrfC.pipe"
+    pipe_D_path = "./shell_files/pipes/hackrfD.pipe"
     
     mqtt_address = "10.12.19.190"
 
-    print("Starting HackRF B")
-    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board B", pipe_B_path , mqtt_address))
+    print("Starting HackRF D")
+    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board D", pipe_D_path , mqtt_address))
 
-    print("Starting HackRF A")
-    process_signal(mqtt_id_4, topic, "board A", pipe_A_path , mqtt_address)
+    print("Starting HackRF C")
+    process_signal(mqtt_id_2, topic, "board C", pipe_C_path , mqtt_address)
 
 if __name__ == "__main__":
     main()
