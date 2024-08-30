@@ -9,14 +9,16 @@ import random
 import time
 import subprocess
 
-def process_signal(id, topic, board, pipe_path, address):
+    
+def process_signal(id, topic, board, pipe_path, address, run_pin):
     
      # Set the synchronisation testing pin
     test_pin = 12
     
-    # Set up GPIO
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(test_pin, GPIO.OUT)
+    if run_pin:
+        # Set up GPIO
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(test_pin, GPIO.OUT)
     
     # Set the broker address and mqtt port
     broker = address
@@ -42,9 +44,13 @@ def process_signal(id, topic, board, pipe_path, address):
             # Q = data[1::2]
             
             # FFT Test Pulse
-            GPIO.output(test_pin, GPIO.HIGH)
+            if run_pin:
+                GPIO.output(test_pin, GPIO.HIGH)
+                
             fft_signal = fft(data, 1024)
-            GPIO.output(test_pin, GPIO.LOW)
+            
+            if run_pin:
+                GPIO.output(test_pin, GPIO.LOW)
             
             real = np.real(fft_signal[len(fft_signal) // 2])
             imag = np.imag(fft_signal[len(fft_signal) // 2])
@@ -78,10 +84,10 @@ def main():
     mqtt_address = "10.12.19.190"
 
     print("Starting HackRF D")
-    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board D", pipe_D_path , mqtt_address))
+    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board D", pipe_D_path , mqtt_address, True))
 
     print("Starting HackRF C")
-    process_signal(mqtt_id_2, topic, "board C", pipe_C_path , mqtt_address)
+    process_signal(mqtt_id_2, topic, "board C", pipe_C_path , mqtt_address, False)
 
 if __name__ == "__main__":
     main()
