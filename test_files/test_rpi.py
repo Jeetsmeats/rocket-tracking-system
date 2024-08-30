@@ -77,10 +77,10 @@ def main():
     mqtt_id_3 = "f265020c6a9c"
     mqtt_id_4 = "ad13a4cc4122"
     
-    pipe_A_path = "./shell_files/pipes/hackrfA.pipe"
-    pipe_B_path = "./shell_files/pipes/hackrfB.pipe"
-    pipe_C_path = "./shell_files/pipes/hackrfC.pipe"
-    pipe_D_path = "./shell_files/pipes/hackrfD.pipe"
+    pipe_A_path = "~/Documents/rocket-tracking-system/shell_files/pipes/hackrfA.pipe"
+    pipe_B_path = "~/Documents/rocket-tracking-system/shell_files/pipes/hackrfB.pipe"
+    pipe_C_path = "~/Documents/rocket-tracking-system/shell_files/pipes/hackrfC.pipe"
+    pipe_D_path = "~/Documents/rocket-tracking-system/shell_files/pipes/hackrfD.pipe"
     
     mqtt_address = "10.12.19.190"
 
