@@ -12,6 +12,8 @@ run_command() {
 	ssh Jeetsmeats@$RPI "$COMMAND"
 }
 
+
+
 # Start HackRF B Internal Clock
 run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/start.sh"
 echo "Activated HackRF B master clock"
@@ -43,6 +45,6 @@ sleep 1s
 echo "Trigger HackRF B and C!"
 
 # Run Data Acquisition Files
-(run_command $RPI1 "python3 ~/Documents/rocket-tracking-system/test_files/test_rpi.py") &
-(run_command $RPI2 "python3 ~/Documents/rocket-tracking-system/test_files/test_rpi2.py) &
+(run_command $RPI1 "~Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi.py") &
+(run_command $RPI2 "~Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi2.py) &
 echo "Executed data collection files and collecting data!"
