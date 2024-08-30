@@ -86,6 +86,8 @@ def main():
     print("Starting HackRF D")
     process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address, True))
 
+    process.start()
+
     print("Starting HackRF C")
     process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address, False)
 
