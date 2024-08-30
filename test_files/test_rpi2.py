@@ -84,10 +84,10 @@ def main():
     mqtt_address = "10.12.19.190"
 
     print("Starting HackRF D")
-    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board D", pipe_D_path , mqtt_address, True))
+    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address, True))
 
     print("Starting HackRF C")
-    process_signal(mqtt_id_2, topic, "board C", pipe_C_path , mqtt_address, False)
+    process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address, False)
 
 if __name__ == "__main__":
     main()
