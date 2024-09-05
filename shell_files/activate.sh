@@ -26,23 +26,23 @@ sleep 15s
 
 # Run HackRF D trigger
 run_command $RPI2 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_D.sh" &
-sleep 1s
+sleep 2s
 echo "Triggered HackRF D!"
 
 # Run HackRF C trigger
 run_command $RPI2 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_C.sh" &
-sleep 1s
+sleep 2s
 echo "Trigger HackRF C!"
 
 # Run HackRF B trigger
 run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_B.sh" &
-sleep 1s
+sleep 2s
 
 echo "Trigger HackRF B!"
 
 # Run HackRF A trigger
 run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_A.sh" &
-sleep 1s
+sleep 2s
 
 echo "Trigger HackRF A!"
 
