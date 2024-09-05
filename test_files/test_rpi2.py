@@ -9,17 +9,8 @@ import random
 import time
 import subprocess
 
-    
 def process_signal(id, topic, board, pipe_path, address):
-    
-    #  # Set the synchronisation testing pin
-    # test_pin = 12
-    
-    # if run_pin:
-    #     # Set up GPIO
-    #     GPIO.setmode(GPIO.BOARD)
-    #     GPIO.setup(test_pin, GPIO.OUT)
-    
+
     # Set the broker address and mqtt port
     broker = address
     port = 1883
@@ -40,17 +31,8 @@ def process_signal(id, topic, board, pipe_path, address):
             raw_data = bytearray(pipe.read(2*8*1024))
             data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
                 
-            # I = data[0::2]
-            # Q = data[1::2]
-            
-            # FFT Test Pulse
-            # if run_pin:
-            #     GPIO.output(test_pin, GPIO.HIGH)
-                
+            # FFT
             fft_signal = fft(data, 1024)
-            
-            # if run_pin:
-            #     GPIO.output(test_pin, GPIO.LOW)
             
             real = np.real(fft_signal[len(fft_signal) // 2])
             imag = np.imag(fft_signal[len(fft_signal) // 2])
