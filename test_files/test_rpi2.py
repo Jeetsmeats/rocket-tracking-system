@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.fft import fft, fftshift
 from matplotlib import pyplot as plt
-from multiprocessing import Process
+from multiprocessing import Process, Lock, Event
 import paho.mqtt.client as paho
 from paho import mqtt
 import RPi.GPIO as GPIO
@@ -9,7 +9,7 @@ import random
 import time
 import subprocess
 
-def process_signal(id, topic, board, pipe_path, address):
+def process_signal(id, topic, board, pipe_path, address, lock, start_event, next_event):
 
     # Set the broker address and mqtt port
     broker = address
@@ -37,9 +37,11 @@ def process_signal(id, topic, board, pipe_path, address):
             real = np.real(fft_signal[len(fft_signal) // 2])
             imag = np.imag(fft_signal[len(fft_signal) // 2])
 
-            client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
-            
-            data = np.array([])
+            with lock:
+                client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+
+            start_event.clear()
+            next_event.set()
                 
 def on_connect(rc):
 
@@ -53,25 +55,27 @@ def main():
         
     topic = "test/topic"
     
-    mqtt_id_1 = "4083e8a8d0dc"
-    mqtt_id_2 = "fe91eb8bc508"
     mqtt_id_3 = "f265020c6a9c"
     mqtt_id_4 = "ad13a4cc4122"
     
-    pipe_A_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfA.pipe"
-    pipe_B_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfB.pipe"
     pipe_C_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfC.pipe"
     pipe_D_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfD.pipe"
     
     mqtt_address = "10.12.19.190"
 
+    lock = Lock()
+    event_C = Event()
+    event_D = Event()
+
+    event_C.set()
+
     print("Starting HackRF D")
-    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address))
+    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address, lock, event_D, event_C))
 
     process.start()
 
     print("Starting HackRF C")
-    process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address)
+    process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address, lock, event_C, event_D)
 
 if __name__ == "__main__":
     main()

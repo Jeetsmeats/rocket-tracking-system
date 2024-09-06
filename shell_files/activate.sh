@@ -26,27 +26,25 @@ sleep 15s
 
 # Run HackRF D trigger
 run_command $RPI2 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_D.sh" &
-sleep 2s
 echo "Triggered HackRF D!"
 
 # Run HackRF C trigger
 run_command $RPI2 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_C.sh" &
-sleep 2s
 echo "Trigger HackRF C!"
 
 # Run HackRF B trigger
 run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_B.sh" &
-sleep 2s
 
 echo "Trigger HackRF B!"
 
 # Run HackRF A trigger
 run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_A.sh" &
-sleep 2s
 
 echo "Trigger HackRF A!"
 
 # Run Data Acquisition Files
-(run_command $RPI1 "~/Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi.py") &
 (run_command $RPI2 "~/Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi2.py") &
+sleep 5s
+(run_command $RPI1 "~/Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi.py") &
+
 echo "Executed data collection files and collecting data!"
