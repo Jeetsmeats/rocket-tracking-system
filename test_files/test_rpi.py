@@ -39,7 +39,7 @@ def process_signal(id, topic, board, pipe_path, address):
             imag = np.imag(fft_signal[len(fft_signal) // 2])
          
             client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
-            time.sleep(0.5)
+            time.sleep(0.01)
             
 
 def on_connect(rc):
