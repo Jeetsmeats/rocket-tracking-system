@@ -37,12 +37,9 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
             
             real = np.real(fft_signal[len(fft_signal) // 2])
             imag = np.imag(fft_signal[len(fft_signal) // 2])
-
-            with lock:
-                client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
-            
-            start_event.clear()
-            next_event.set()
+         
+            client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+            time.sleep(0.5)
             
 
 def on_connect(rc):
@@ -65,20 +62,13 @@ def main():
   
     mqtt_address = "10.12.19.190"
 
-    lock = Lock()
-    event_A = Event()
-    event_B = Event()
-
-    # Set event A as starting event
-    event_A.set()
-
     print("Starting HackRF B")
-    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board B", pipe_B_path , mqtt_address, lock, event_B, event_A))
+    process = Process(target=process_signal, args=(mqtt_id_1, topic, "board B", pipe_B_path , mqtt_address,))
 
     process.start()
     
     print("Starting HackRF A")
-    process_signal(mqtt_id_2, topic, "board A", pipe_A_path , mqtt_address, lock, event_A, event_B)
+    process_signal(mqtt_id_2, topic, "board A", pipe_A_path , mqtt_address,)
 
 if __name__ == "__main__":
     main()

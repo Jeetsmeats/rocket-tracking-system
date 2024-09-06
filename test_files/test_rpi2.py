@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.fft import fft, fftshift
 from matplotlib import pyplot as plt
-from multiprocessing import Process, Lock, Event
+from multiprocessing import Process
 import paho.mqtt.client as paho
 from paho import mqtt
 import RPi.GPIO as GPIO
@@ -9,7 +9,7 @@ import random
 import time
 import subprocess
 
-def process_signal(id, topic, board, pipe_path, address, lock, start_event, next_event):
+def process_signal(id, topic, board, pipe_path, address):
 
     # Set the broker address and mqtt port
     broker = address
@@ -37,12 +37,9 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
             real = np.real(fft_signal[len(fft_signal) // 2])
             imag = np.imag(fft_signal[len(fft_signal) // 2])
 
-            with lock:
-                client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+            client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+            time.sleep(0.5)
 
-            start_event.clear()
-            next_event.set()
-                
 def on_connect(rc):
 
     if rc == 0:
@@ -63,19 +60,13 @@ def main():
     
     mqtt_address = "10.12.19.190"
 
-    lock = Lock()
-    event_C = Event()
-    event_D = Event()
-
-    event_C.set()
-
     print("Starting HackRF D")
-    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address, lock, event_D, event_C))
+    process = Process(target=process_signal, args=(mqtt_id_3, topic, "board D", pipe_D_path , mqtt_address))
 
     process.start()
 
     print("Starting HackRF C")
-    process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address, lock, event_C, event_D)
+    process_signal(mqtt_id_4, topic, "board C", pipe_C_path , mqtt_address)
 
 if __name__ == "__main__":
     main()
