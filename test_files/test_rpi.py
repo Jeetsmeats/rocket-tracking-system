@@ -10,7 +10,7 @@ import random
 import time
 import subprocess
 
-def process_signal(id, topic, board, pipe_path, address, lock, start_event, next_event):
+def process_signal(id, topic, board, pipe_path, address):
     
     # Set the broker address and mqtt port
     broker = address
