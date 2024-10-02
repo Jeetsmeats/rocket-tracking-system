@@ -1,45 +1,61 @@
 
 import numpy as np
-from numpy.fft import fft, fftshift
-from matplotlib import pyplot as plt
+from numpy.fft import fft, fftshift, fftfreq
 from multiprocessing import Process, Lock, Event
 import paho.mqtt.client as paho
-from paho import mqtt
-import RPi.GPIO as GPIO
-import random
+import orjson
 import time
-import subprocess
 
 def process_signal(id, topic, board, pipe_path, address, lock, start_event, next_event):
     
     # Set the broker address and mqtt port
     broker = address
     port = 1883
-    
+
     # Connect to broker
     client = paho.Client(client_id=id, protocol=paho.MQTTv5)
     client.on_connect = on_connect
     client.connect(broker, port)
 
-    f = 915000000
+    # Constants
+    f = 915e6
+    f_sample = 10e6
+    n = 1024
+
+    fft_dict = {
+        "Board": board,
+        "real": "",
+        "imag": "",
+    }
 
     with open(pipe_path, 'rb') as pipe:
-        
-        data = np.array([])
-        
+
         while True:
-            
+
+            # Read raw data
             raw_data = bytearray(pipe.read(2*8*1024))
             data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
 
             # FFT 
-            fft_signal = fft(data, 1024)
-            
-            real = np.real(fft_signal[len(fft_signal) // 2])
-            imag = np.imag(fft_signal[len(fft_signal) // 2])
+            fft_signal = fft(data, n)
+            freq = fftfreq(n, 1/f_sample)
 
+            # Desired Freq index
+            index = np.argmin(np.abs(freq - f))
+
+            # Real and Imaginary components of signal
+            real = np.real(fft_signal[index])
+            imag = np.imag(fft_signal[index])
+
+            fft_dict["real"] = str(real)
+            fft_dict["imag"] = str(imag)
+
+            # Publishing Signal
+            payload = orjson.dumps(fft_dict)
+
+            # Lock processes
             with lock:
-                client.publish(topic, f"Board: {board} Real: {real}, Imag: {imag}")
+                client.publish(topic, payload)
             
             start_event.clear()
             next_event.set()
