@@ -1,7 +1,7 @@
 #!/bin/bash
 
-RPI1="10.13.124.175"
-RPI2="10.12.42.202"
+RPI1="10.13.101.198"
+RPI2="10.12.48.240"
 echo "Set up RPi IP Addresses"
 
 run_command() {
