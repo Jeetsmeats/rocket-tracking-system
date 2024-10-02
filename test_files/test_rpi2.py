@@ -77,7 +77,7 @@ def main():
     pipe_C_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfC.pipe"
     pipe_D_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfD.pipe"
     
-    mqtt_address = "10.12.19.190"
+    mqtt_address = "10.12.14.63"
 
     lock = Lock()
     event_C = Event()

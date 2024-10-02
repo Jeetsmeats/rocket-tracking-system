@@ -81,7 +81,7 @@ def main():
     pipe_A_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfA.pipe"
     pipe_B_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfB.pipe"
   
-    mqtt_address = "10.12.19.190"
+    mqtt_address = "10.12.14.63"
 
     lock = Lock()
     event_A = Event()
