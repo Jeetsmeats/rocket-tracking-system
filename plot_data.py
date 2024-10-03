@@ -8,7 +8,7 @@ max_samples = 100  # Maximum number of samples to display in the plot
 
 # MQTT configuration
 broker = "mqtt://10.12.14.63:1883"  # Public broker, replace with your own if necessary
-topic = "sample/doa"  # Topic for DoA estimates
+topic = "test/topic"  # Topic for DoA estimates
 
 def main():
     live_plot_mqtt()

@@ -41,7 +41,8 @@ def prepare_steering_vector():
 
 def on_message(client, userdata, payload):
 
-        print(orjson.loads(payload))
+        client.publish("sample/doa", payload)
+        # print(orjson.loads(payload))
         # # Assuming the message payload contains the DoA estimate in degrees
         # try:
         #     doa_estimate = float(msg.payload.decode())
