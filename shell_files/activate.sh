@@ -42,6 +42,9 @@ run_command $RPI1 "bash ~/Documents/rocket-tracking-system/shell_files/trigger_A
 
 echo "Trigger HackRF A!"
 
+# Run the receiver code
+(run_command $RPI1 "~/Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/receiver2x2.py" &
+
 # Run Data Acquisition Files
 (run_command $RPI2 "~/Documents/rocket-tracking-system/.venv/bin/python3 ~/Documents/rocket-tracking-system/test_files/test_rpi2.py") &
 sleep 5s

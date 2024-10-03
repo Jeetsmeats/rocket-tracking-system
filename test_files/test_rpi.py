@@ -61,7 +61,6 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
             next_event.set()
 
             time.sleep(0.05)
-            
 
 def on_connect(rc):
 
