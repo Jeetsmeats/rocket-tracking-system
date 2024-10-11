@@ -34,14 +34,14 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
 
             # FFT
             fft_signal = fft(data, n)
-            freq = fftfreq(n, 1 / f_sample)
+            # freq = fftfreq(n, 1 / f_sample)
 
-            # Desired Freq index
-            index = np.argmin(np.abs(freq - f))
+            # # Desired Freq index
+            # index = np.argmin(np.abs(freq - f))
 
             # Real and Imaginary components of signal
-            real = np.real(fft_signal[index])
-            imag = np.imag(fft_signal[index])
+            real = np.real(fft_signal[0])
+            imag = np.imag(fft_signal[0])
 
             fft_dict["real"] = str(real)
             fft_dict["imag"] = str(imag)

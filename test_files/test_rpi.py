@@ -18,8 +18,8 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
     client.connect(broker, port)
 
     # Constants
-    f = 915e6
-    f_sample = 10e6
+    f = 915000000
+    f_sample = 2000000
     n = 1024
 
     fft_dict = {
@@ -33,19 +33,19 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
         while True:
 
             # Read raw data
-            raw_data = bytearray(pipe.read(2*8*1024))
+            raw_data = bytearray(pipe.read(2 * 8 * 1024))
             data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
 
-            # FFT 
+            # FFT
             fft_signal = fft(data, n)
-            freq = fftfreq(n, 1/f_sample)
+            # freq = fftfreq(n, 1 / f_sample)
 
-            # Desired Freq index
-            index = np.argmin(np.abs(freq - f))
+            # # Desired Freq index
+            # index = np.argmin(np.abs(freq - f))
 
             # Real and Imaginary components of signal
-            real = np.real(fft_signal[index])
-            imag = np.imag(fft_signal[index])
+            real = np.real(fft_signal[0])
+            imag = np.imag(fft_signal[0])
 
             fft_dict["real"] = str(real)
             fft_dict["imag"] = str(imag)
@@ -56,7 +56,7 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
             # Lock processes
             with lock:
                 client.publish(topic, payload)
-            
+
             start_event.clear()
             next_event.set()
 
@@ -80,7 +80,9 @@ def main():
     pipe_A_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfA.pipe"
     pipe_B_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfB.pipe"
   
+    
     mqtt_address = "10.12.14.63"
+    # mqtt_address = "192.168.1.142"
 
     lock = Lock()
     event_A = Event()
