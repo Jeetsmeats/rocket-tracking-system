@@ -3,10 +3,11 @@ from numpy.fft import fft
 from matplotlib import pyplot as plt
 import paho.mqtt.client as paho
 import os
-import pyserial
+# import pyserial
 import orjson
 from scipy import constants
 
+global in_buff
 def prepare_steering_vector():
 
     # Constants
@@ -34,23 +35,23 @@ def prepare_steering_vector():
             curr_elevation_angle = elevation_A[j]
             idx = (i-1)*n_elevation_angles + j
             for k in range(M):
-                mua = 2*np.pi*R*(np.cos(phi[k])*np.cos(curr_azimuth_angle)*np.cos(curr_elevation_angle) + np.sin(phi[k])*np.sin(curr_azimuth_angle)*np.cos(curr_elevation_angle) ) / (w_length)
+                mua = 2*np.pi*R*(np.cos(phi[k]) * np.cos(curr_azimuth_angle)*np.cos(curr_elevation_angle) + np.sin(phi[k])*np.sin(curr_azimuth_angle)*np.cos(curr_elevation_angle) ) / (w_length)
                 steering_vector[k, idx] = np.exp(-1j*mua)
 
 # ser = serial.Serial('dev/ttyS0', 9600, timeout=1)
 
 def on_message(client, userdata, payload):
 
-        client.publish("sample/doa", payload)
-        # print(orjson.loads(payload))
-        # # Assuming the message payload contains the DoA estimate in degrees
-        # try:
-        #     doa_estimate = float(msg.payload.decode())
-        #     doa_data.append(doa_estimate)
-        #     if len(doa_data) > max_samples:  # Keep the list size constant
-        #         doa_data.pop(0)  # Remove the oldest data point to create a shifting effect
-        # except ValueError:
-        #     print("Invalid DoA estimate received")
+    decoded_json = orjson.loads(payload)
+    # print(orjson.loads(payload))
+    # # Assuming the message payload contains the DoA estimate in degrees
+    # try:
+    #     doa_estimate = float(msg.payload.decode())
+    #     doa_data.append(doa_estimate)
+    #     if len(doa_data) > max_samples:  # Keep the list size constant
+    #         doa_data.pop(0)  # Remove the oldest data point to create a shifting effect
+    # except ValueError:
+    #     print("Invalid DoA estimate received")
 
 
 # Function to process data and estimate DOA
@@ -59,11 +60,13 @@ def process_stream():
     # MQTT Setup
     broker = "10.12.14.63"  # Change this to your broker IP address
     topic = "test/topic"
-    client = paho.Client()
+
+    client_id = "v9Sy4w8GWpNv"
+    client = paho.Client(client_id=client_id, protocol=paho.MQTTv5)
     client.connect(broker)
 
-    client.subscribe(topic)
     client.loop_start()
+    client.subscribe(topic)
     # try:
     #     while True:
 
