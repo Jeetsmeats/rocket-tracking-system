@@ -7,7 +7,6 @@ import orjson
 import time
 
 def process_signal(id, topic, board, pipe_path, address, lock, start_event, next_event):
-    
     # Set the broker address and mqtt port
     broker = address
     port = 1883
@@ -29,16 +28,18 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
     }
 
     with open(pipe_path, 'rb') as pipe:
-
         while True:
-
             # Read raw data
             raw_data = bytearray(pipe.read(2 * 8 * 1024))
             data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
 
             # FFT
             fft_signal = fft(data, n)
+<<<<<<< HEAD
             # freq = fftfreq(n, 1 / f_sample)
+=======
+            freq = fftfreq(n, 1 / f_sample)
+>>>>>>> 83613d5 (pi 5 files)
 
             # # Desired Freq index
             # index = np.argmin(np.abs(freq - f))

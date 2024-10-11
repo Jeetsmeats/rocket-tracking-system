@@ -16,8 +16,8 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
     client.connect(broker, port)
 
     # Constants
-    f = 915e6
-    f_sample = 10e6
+    f = 915000000
+    f_sample = 2000000
     n = 1024
 
     fft_dict = {
@@ -28,6 +28,7 @@ def process_signal(id, topic, board, pipe_path, address, lock, start_event, next
 
     with open(pipe_path, 'rb') as pipe:
         while True:
+            
             # Read raw data
             raw_data = bytearray(pipe.read(2 * 8 * 1024))
             data = np.array(raw_data).astype(np.int8).astype(np.float64).view(np.complex128)
@@ -78,7 +79,8 @@ def main():
     pipe_D_path = "/home/Jeetsmeats/Documents/rocket-tracking-system/shell_files/pipes/hackrfD.pipe"
     
     mqtt_address = "10.12.14.63"
-
+    # mqtt_address = "192.168.1.142"
+    
     lock = Lock()
     event_C = Event()
     event_D = Event()
